@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "deep-music"
+version = "0.1.0"
+description = ""
+authors = ["julianferry94@gmail.com"]
+
+
+[tool.poetry.dependencies]
+python = "^3.7"
+pandas = "^1.0.1"
+jupyter = { version = "^1.0.0",  optional = true }
+seaborn = { version = "^0.10.0", optional = true }
+
+
+[tool.poetry.extras]
+eda = ["jupyter", "seaborn"]
+
+
+[tool.poetry.dev-dependencies]
+flake8 = "^3.7.9"
+pytest = "^5.3.5"
+pytest-cov = "^2.8.1"
+
+
+[build-system]
+requires = ["poetry>=1.0.5"]
+build-backend = "poetry.masonry.api"
