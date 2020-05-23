@@ -10,16 +10,19 @@ from scipy.signal import butter, lfilter
 import scipy.ndimage
 
 
-def butter_bandpass(lowcut, highcut, fs, order=5):
-    nyq = 0.5 * fs
-    low = lowcut / nyq
-    high = highcut / nyq
-    b, a = butter(order, [low, high], btype="band")
-    return b, a
-
-
-def butter_bandpass_filter(data, lowcut, highcut, fs, order=5):
-    b, a = butter_bandpass(lowcut, highcut, fs, order=order)
+def butterworth_filter(data, sampling_rate, lowcut, highcut, btype='lowpass', order=5):
+    # Filter parameters
+    nyq = 0.5 * sampling_rate
+    if btype.startswith('low'):
+        Wn = highcut
+    elif btype.startswith('high'):
+        Wn = lowcut
+    elif btype.startswith('band'):
+        Wn = np.array([lowcut, highcut])
+    else:
+        raise(ValueError('Filter should be one of lowpass, highpass, bandpass or bandstop'))
+    # Create and apply filter
+    b, a = butter(order, Wn/nyq, btype=btype)
     y = lfilter(b, a, data)
     return y
 
