@@ -131,6 +131,7 @@ class AudioFile:
             log=True,
             thresh=spec_thresh,
         )
+        self.hz_per_idx = self.nyquist / self.spectrogram.shape[1]
 
     def spectrogram_to_audio(self, spectrogram, time_intervals=1):
         """
@@ -155,7 +156,7 @@ class AudioFile:
             spectrogram - np.array - spectrogram for which to calculate indices
             min_freq - float - minimum frequency to find index for
             max_freq - float - maximum frequency to find index for
-            log_scale - bool - whether or not the frequencies are on a log scale
+            log_scale - bool - whether or not the spectrogram frequencies are on a log scale
         """
         # ymin
         if min_freq <= 1:
@@ -208,12 +209,18 @@ class AudioFile:
         )
         ax.get_xaxis().set_visible(False)
         if log_scale:
+            # Reverse engineer the log_multiplier that was used to create the log spectrogram
+            resolution = int(round(spectrogram.shape[1] / \
+                self._freq_to_log(self._idx_to_freq(self.spectrogram.shape[1]))
+            ))
+            # Change yticks to log scale
             ytick_freqs = range(
                 (ymin//self.fundamental_freq + 1) * self.fundamental_freq,
                 max_freq+1,
                 self.fundamental_freq
             )
-            plt.yticks([self._log_to_idx(self._freq_to_log(x))-ymin for x in ytick_freqs])
+            plt.yticks([self._log_to_idx(self._freq_to_log(x), resolution) - ymin
+                        for x in ytick_freqs])
             ax.set_yticklabels(ytick_freqs)
         fig.colorbar(cax)
         plt.title(title)
@@ -225,26 +232,47 @@ class AudioFile:
         return idx*self.hz_per_idx
     def _freq_to_log(self, freq):
         return np.log2(freq)
-    def _log_to_idx(self, log_freq):
-        return int(log_freq * 10000)
-    def _idx_to_log_idx(self, idx):
-        return self._log_to_idx(self._freq_to_log(self._idx_to_freq(idx)))
-    def spectrogram_to_log(self, spectrogram):
+    def _log_to_idx(self, log_freq, resolution=19259):
+        return int(log_freq * resolution)
+    def _idx_to_log_idx(self, idx, *args, **kwargs):
+        return self._log_to_idx(self._freq_to_log(self._idx_to_freq(idx)), *args, **kwargs)
+    def calculate_log_resolution(self, spectrogram):
+        """
+        Calculate the lowest _log_to_idx() resolution for which none of the freq->log(freq)
+        mappings overlap in the log domain.
+        This ensures that no information is lost when mapping to log frequencies.
+        """
+        resolution = 1
+        top_ns = 10 ** np.arange(1, math.ceil(np.log10(spectrogram.shape[1])))
+        top_ns = np.append(top_ns, spectrogram.shape[1]-1)
+        for top_n in top_ns:
+            print(f'Finding the lowest resolution multiplier for which the top {top_n} '
+                  'log frequencies do not overlap...')
+            equality = True
+            while equality:
+                equality = False
+                for i in range(0, top_n):
+                    if (self._idx_to_log_idx(self.spectrogram.shape[1]-i, resolution) == \
+                        self._idx_to_log_idx(self.spectrogram.shape[1]-i-1, resolution)):
+                        equality = True    
+                resolution+=1
+            print('Resolution multiplier found:', resolution)
+    
+    def spectrogram_to_log(self, spectrogram, **kwargs):
         """ Convert a spectrogram to the log2 domain
         
         Args:
             spectrogram - spectrogram to convert to log domain
         """
         # Setup
-        self.hz_per_idx = self.nyquist / spectrogram.shape[1]
         idx_one_hz = math.ceil(1 / self.hz_per_idx)
-        max_log_idx = self._idx_to_log_idx(spectrogram.shape[1])
+        max_log_idx = self._idx_to_log_idx(spectrogram.shape[1], **kwargs)
         self.spectrogram_log = np.zeros((spectrogram.shape[0], max_log_idx))
         # Calculate log spectrogram
         for t in range(spectrogram.shape[0]):
             prev_log_idx = 0
             for idx in range(idx_one_hz, spectrogram.shape[1]):
-                log_idx = self._idx_to_log_idx(idx)
+                log_idx = self._idx_to_log_idx(idx, **kwargs)
                 self.spectrogram_log[t, prev_log_idx:log_idx] = spectrogram[t, idx]
                 prev_log_idx = log_idx        
         
