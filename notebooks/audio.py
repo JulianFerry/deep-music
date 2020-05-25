@@ -217,6 +217,8 @@ class AudioFile:
             spectrogram - spectrogram to convert to log domain
         """
         # Setup
+        if kwargs.get('resolution'):
+            self.set_log_resolution(kwargs['resolution'])
         if not self.log_resolution:
             resolution = self.calculate_log_resolution(spectrogram)
             self.set_log_resolution(resolution)
@@ -277,7 +279,7 @@ class AudioFile:
         return self._log_to_logidx(self._freq_to_log(self._idx_to_freq(idx)), **kwargs) 
 
     def plot_spectrogram(self, spectrogram, title='', figsize=(10, 6), log_scale=False,
-                         min_freq=0, max_freq='default'):
+                         min_freq=0, max_freq='default', **kwargs):
         """
         Plot a spectrogram
         
@@ -291,7 +293,13 @@ class AudioFile:
         """
         min_freq, max_freq, ymin, ymax = \
             self._get_plot_ylim(spectrogram, min_freq, max_freq, log_scale)
-        fig, ax = plt.subplots(nrows=1, ncols=1, figsize=figsize)
+        if kwargs.get('ax') is not None:
+            if kwargs.get('fig') is not None:
+                fig, ax = kwargs['fig'], kwargs['ax']
+            else:
+                raise(ValueError('Both fig and ax must be specified, or not at all'))
+        else:
+            fig, ax = plt.subplots(nrows=1, ncols=1, figsize=figsize)
         cax = ax.matshow(
             spectrogram.T[ymin:ymax],
             interpolation="nearest",
@@ -301,19 +309,23 @@ class AudioFile:
         )
         ax.get_xaxis().set_visible(False)
         # Change yticks
-        ytick_freqs = range((ymin//self.fundamental_freq + 1) * self.fundamental_freq,
-                            max_freq+1,
-                            self.fundamental_freq)
-        if log_scale:
-            plt.yticks([self._log_to_logidx(self._freq_to_log(x)) - ymin for x in ytick_freqs])
+        if not log_scale:
+            y_step = self.fundamental_freq * int((max_freq-min_freq) / (10*self.fundamental_freq))
+            ytick_freqs = range(y_step, max_freq+1, y_step)
+            ax.set_yticks([self._freq_to_idx(x) for x in ytick_freqs])
         else:
-            plt.yticks([self._freq_to_idx(x) - ymin for x in ytick_freqs])
+            y_step = self.fundamental_freq
+            first_fundamental = self.fundamental_freq * (1 + (min_freq//self.fundamental_freq))
+            nth_fundamental =  min(max_freq, first_fundamental+(y_step*10))
+            ytick_freqs = range(first_fundamental, nth_fundamental+1, y_step)
+            ax.set_yticks([self._log_to_logidx(self._freq_to_log(x)) for x in ytick_freqs])
         ax.set_yticklabels(ytick_freqs)
-        fig.colorbar(cax)
-        plt.title(title)
-        plt.ylabel('Frequency (Hz)')
-        plt.tight_layout()
-        plt.show()
+        ax.set_title(title)
+        ax.set_ylabel('Frequency (Hz)')
+        fig.tight_layout()
+        if not kwargs.get('ax'):
+            fig.colorbar(cax)
+            plt.show()
 
     def _get_plot_ylim(self, spectrogram, min_freq, max_freq, log_scale):
         """
