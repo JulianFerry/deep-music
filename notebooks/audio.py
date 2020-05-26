@@ -5,7 +5,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from functools import partial
 from pathlib import Path
-from scipy.io import wavfile
+import soundfile
+# from scipy.io import wavfile
 from scipy import signal
 from IPython.display import Audio, display
 from warnings import warn
@@ -25,23 +26,30 @@ class AudioDataset:
             instrument - str - ('keyboard_acoustic', 'guitar_acoustic')
             file_index - int - index of the file within the specified dataset 
         """
-        if type(path) is str:
-            self.path = Path(path)
-        elif type(path) is Path:
-            self.path = path
-        else:
-            raise(ValueError('path argument should be {} or {}'.format(str, Path)))
-        self.abspath = self.path.resolve()
-        # Load metadata
-        self.examples = json.load(open(self.abspath/'examples.json'))
-        self.file_names = pd.Series(list(self.examples.keys()))
-        re_find_instruments = partial(re.findall, '(^.*?)_\d')
-        self.unique_instruments = (self.file_names
-                                   .apply(re_find_instruments)
-                                   .str[0]
-                                   .unique())
+        self.path = path if type(path) is Path else Path(path)
+        # Metadata
+        self.examples = json.load(open(self.path/'examples.json'))
+        # File names per instrument
+        self.file_names = {}
+        self.file_names_nested = {}
+        re_instrument = partial(re.findall, '(^.*?)_\d')
+        for file in self.examples.keys():
+            prefix = self.examples[file]['instrument_str']
+            instrument = re_instrument(prefix)[0]
+            self.file_names.setdefault(instrument, []).append(file)
+            self.file_names_nested.setdefault(instrument, {}).setdefault(prefix, []).append(file)
+        # Unique instruments
+        self.unique_instruments = list(self.file_names.keys())
+        # File counts
+        self.file_counts = {instr: len(self.file_names[instr])
+                            for instr in self.unique_instruments}
+    
+    def _check_instrument(self, instrument):
+        """Check input"""
+        if instrument not in self.unique_instruments:
+            raise(ValueError(f'Instrument {instrument} is not one of {self.unique_instruments}'))
         
-    def get_filepath(self, instrument, file_index, folder='audio', ext='.wav'):
+    def get_filepath(self, instrument=None, file_index=None, file_name=None):
         """
         Returns the path of an audio file in the dataset. Files will be restricted
         to those starting with the `instrument` string - `file_index` is used to
@@ -51,10 +59,14 @@ class AudioDataset:
             instrument - str - one of ('keyboard_acoustic', 'guitar_acoustic')
             file_index - int - index of the file within the instrument's subset of files
         """
-        file = Path(
-            self.file_names[self.file_names.str.startswith(instrument)].iloc[file_index] + ext
-        )
-        path = self.abspath/'audio'/file.name
+        if file_name is not None:
+            file = Path(file_name + '.wav')
+        elif instrument is not None and file_index is not None:
+            self._check_instrument(instrument)
+            file = Path(self.file_names[instrument][file_index] + '.wav')
+        else:
+            raise(ValueError('Either file_name or both instrument and file_index must be specified'))
+        path = self.path/'audio'/file.name
         info = self.examples[file.stem]        
         return path, info
 
@@ -64,18 +76,20 @@ class AudioFile:
     Defines methods to load, process and visualise audio data using spectrograms
     
     Methods:
-        __init__ - fetch the path of an audio file in '../data/raw/nsynth-*'
-        load_audio - load data from the .wav audio file
+        __init__ - load audio data from a .wav file
+        trim_audio - trim start and end times of the audio data
+        filter_audio - apply a butterworth filter (lp, hp, bp, bs) to the audio data
         plot_audio - plot the audio waveform in the time domain
         play_audio - create a widget to play that audio
         audio_to_spectrogram - generate an FFT spectrogram from the audio data
-        spectrogram_to_audio - convert a spectrogram back to an audio waveform
-        plot_spectrogram - plot a spectrogram
         filter_harmonics - filter out all non-harmonic frequencies from the spectrogram
+        spectrogram_to_audio - convert a spectrogram back to an audio waveform
+        spectrogram_to_log - convert a spectrogram's frequencies to the log domain
+        plot_spectrogram - plot a spectrogram
         convolve_spectrogram (experimental) - apply non-continuous 1-D convolution
     """
     
-    def __init__(self, path, info=None):
+    def __init__(self, path, info):
         """
         Load audio data from .wav file
         
@@ -86,17 +100,29 @@ class AudioFile:
         """
         self.path = path
         self.info = info
-        self.fundamental_freq = None
+        if info.get('pitch'):
+            self.fundamental_freq = self._pitch_to_freq(info['pitch'])
+        else:
+            warn('No pitch information found\n'
+                 'Some funtionality will not work unless you modify .fundamental_freq')
+            self.fundamental_freq = None
         self.log_resolution = None
         self._load_audio()
-        
+
+    def _pitch_to_freq(self, pitch):
+        """
+        Convert NSynth note pitch integer to a frequency 
+        """
+        a = 12 * math.log2(55) - 33
+        return int(round(2**((pitch+a)/12)))
+    
     # Audio methods
     def _load_audio(self):
         """
         Load audio from the path specified in __init__
         Automatically called on class creation
         """
-        self.sampling_rate, self.audio = wavfile.read(self.path)
+        self.audio, self.sampling_rate = soundfile.read(self.path)
         self.nyquist = self.sampling_rate // 2
         self.duration = self.audio.shape[0] / self.sampling_rate
 
@@ -153,11 +179,11 @@ class AudioFile:
         plt.tight_layout()
         plt.show()
 
-    def play_audio(self):
+    def play_audio(self, autoplay=False):
         """
         Create widget which plays audio
         """
-        display(Audio(self.audio, rate=self.sampling_rate))
+        display(Audio(self.audio, rate=self.sampling_rate, autoplay=autoplay))
     
     # Spectrogram methods
     def audio_to_spectrogram(self, time_intervals=1, spec_thresh=4):
