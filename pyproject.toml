@@ -10,7 +10,7 @@ python = "^3.7"
 pandas = "^1.0.1"
 jupyter = { version = "^1.0.0",  optional = true }
 seaborn = { version = "^0.10.0", optional = true }
-soundfile = "^0.10.3"
+librosa = "^0.7.2"
 
 
 [tool.poetry.extras]

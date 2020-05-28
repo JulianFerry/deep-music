@@ -2,19 +2,19 @@ import json
 import re
 import pandas as pd
 import numpy as np
+import librosa
 import matplotlib.pyplot as plt
 from functools import partial
 from pathlib import Path
-import soundfile
-# from scipy.io import wavfile
+from scipy.io import wavfile
 from scipy import signal
 from IPython.display import Audio, display
 from warnings import warn
 import math
 
 from fft import butterworth_filter, pretty_spectrogram, invert_pretty_spectrogram
-from fft import create_mel_filter, make_mel, mel_to_spectrogram
 
+# AN EVALUATION OF AUDIO FEATURE EXTRACTION TOOLBOXES
 
 class AudioDataset:
     def __init__(self, path='../data/raw/nsynth-train/', metadata='examples.json'):
@@ -101,32 +101,26 @@ class AudioFile:
         self.path = path
         self.info = info
         if info.get('pitch'):
-            self.fundamental_freq = self._pitch_to_freq(info['pitch'])
+            self.fundamental_freq = librosa.midi_to_hz(info['pitch'])
         else:
             warn('No pitch information found\n'
                  'Some funtionality will not work unless you modify .fundamental_freq')
             self.fundamental_freq = None
-        self.log_resolution = None
-        self._load_audio()
-
-    def _pitch_to_freq(self, pitch):
-        """
-        Convert NSynth note pitch integer to a frequency 
-        """
-        a = 12 * math.log2(55) - 33
-        return int(round(2**((pitch+a)/12)))
+        self.cqt_parmas = None
+        self.reload_audio()
     
     # Audio methods
-    def _load_audio(self):
+    def reload_audio(self):
         """
         Load audio from the path specified in __init__
         Automatically called on class creation
         """
-        self.audio, self.sampling_rate = soundfile.read(self.path)
+        self.sampling_rate, self.audio = wavfile.read(self.path)
+        self.audio = self.audio.astype(np.float)
         self.nyquist = self.sampling_rate // 2
         self.duration = self.audio.shape[0] / self.sampling_rate
 
-    def trim_audio(self, start=0, end=-1, reload=True):
+    def trim_audio(self, start=0, end=-1):
         """
         Trim the audio data to start and end times (in seconds)
         
@@ -134,8 +128,6 @@ class AudioFile:
             start - numeric - start time (seconds)
             end - numeric - end time (seconds)
         """
-        if reload:
-            self._load_audio()
         start_idx = 0
         if start != 0:
             if 0 < start < self.duration:
@@ -186,40 +178,39 @@ class AudioFile:
         display(Audio(self.audio, rate=self.sampling_rate, autoplay=autoplay))
     
     # Spectrogram methods
-    def audio_to_spectrogram(self, time_intervals=1, spec_thresh=4):
+    def audio_to_spectrogram(self, time_intervals=1, resolution=1):
         """
-        Stolen from: https://timsainburg.com/python-mel-compression-inversion.html
-
         Args:
-            time_intervals: how many time intervals to create a spectrogram for   
-            spec_thresh: threshold for spectrograms (lower filters out more noise)
+            time_intervals: how many time intervals to create a spectrogram for  
         """
-        # fft_size is maximised to maximise the frequency domain resolution
-        fft_size = (self.audio.shape[0] // 2) * 2
-        self.time_intervals = time_intervals
-        step_size = fft_size // self.time_intervals
+        # setting resolution=1 maximises the frequency domain resolution
+        fft_size = self._get_fft_size(resolution)
+        self.hop_length = int(self.audio.shape[0] / time_intervals)
         # Create spectrogram
-        self.spectrogram = pretty_spectrogram(
-            self.audio.astype("float64"),
-            fft_size=fft_size,
-            step_size=step_size,
-            log=True,
-            thresh=spec_thresh,
+        self.spectrogram = librosa.core.stft(
+            self.audio,
+            n_fft=fft_size,
+            hop_length=self.hop_length + 1,
         )
-        self.hz_per_idx = self.nyquist / self.spectrogram.shape[1]
 
+    def _get_fft_size(self, resolution):
+        """
+        Get fft_size for a given resolution
+        
+        resolution - float <= 1 - 1 is maximal frequency resolution that is a power of 2
+        """
+        fft_size = 2**int(np.log2(resolution * self.audio.shape[0]))
+        return fft_size
+    
     def spectrogram_to_audio(self, spectrogram):
         """
         Convert spectrogram to audio
         """
-        fft_size = spectrogram.shape[1] * 2
-        step_size = fft_size // self.time_intervals
-        recovered_audio = invert_pretty_spectrogram(
+        f_inverse = librosa.istft if spectrogram.dtype == 'complex64' else librosa.griffinlim
+        recovered_audio = f_inverse(
             spectrogram,
-            fft_size=fft_size,
-            step_size=step_size,
-            log=True,
-            n_iter=10
+            hop_length=self.hop_length + 1,
+            center=False
         )
         display(Audio(recovered_audio, rate=self.sampling_rate))
 
@@ -230,161 +221,110 @@ class AudioFile:
         Args:
             neighbour_radius - int -  number of neighbouring frequencies to include
         """
-        self.spectrogram_harm = np.ones(self.spectrogram.shape) * self.spectrogram.min()
-        step = self.fundamental_freq * self.spectrogram.shape[1] // self.nyquist
-        for i in range(neighbour_radius+1):
-            self.spectrogram_harm[0, step+i::step] = self.spectrogram[0, step+i::step]
-            self.spectrogram_harm[0, step-i::step] = self.spectrogram[0, step-i::step]
+        self.spectrogram_harm = np.zeros(self.spectrogram.shape, dtype='complex64')
+        step = int(self.fundamental_freq * self.spectrogram.shape[0] / self.nyquist)
+        for t in range(self.spectrogram.shape[1]):
+            for i in range(neighbour_radius+1):
+                self.spectrogram_harm[step+i::step, t] = self.spectrogram[step+i::step, t]
+                self.spectrogram_harm[step-i::step, t] = self.spectrogram[step-i::step, t]
     
-    def spectrogram_to_log(self, spectrogram, **kwargs):
-        """ Convert a spectrogram to the log2 domain
+    def audio_to_cqt_spectrogram(self, resolution=1, min_freq=32.7, max_freq=-1):
+        """ Convert
         
         Args:
             spectrogram - spectrogram to convert to log domain
         """
         # Setup
-        if kwargs.get('resolution'):
-            self.set_log_resolution(kwargs['resolution'])
-        if not self.log_resolution:
-            resolution = self.calculate_log_resolution(spectrogram)
-            self.set_log_resolution(resolution)
-        idx_one_hz = math.ceil(1 / self.hz_per_idx)
-        max_log_idx = self._idx_to_logidx(spectrogram.shape[1], **kwargs)
-        self.spectrogram_log = np.zeros((spectrogram.shape[0], max_log_idx))
-        # Convert spectrogram to log
-        for t in range(spectrogram.shape[0]):
-            prev_log_idx = 0
-            for idx in range(idx_one_hz, spectrogram.shape[1]):
-                log_idx = self._idx_to_logidx(idx, **kwargs)
-                self.spectrogram_log[t, prev_log_idx:log_idx] = spectrogram[t, idx]
-                prev_log_idx = log_idx
+        max_freq = self._get_max_freq(max_freq)
+        self._set_cqt_params(resolution, min_freq, max_freq)
+        self.spectrogram_cqt = np.abs(librosa.cqt(
+            y=self.audio,
+            sr=self.sampling_rate,
+            **self.cqt_params,
+            scale=False,
+            sparsity=0,     # high-res but possibly slow
+            res_type='fft'  # high-res but possibly slow
+        ))[:, :1]
 
-    def set_log_resolution(self, resolution):
-        """
-        Set the multiplier used to convert log2 frequencies to a `spectrogram_log` array index
-        Used by _log_to_logidx()
-        
-        Args:
-            resolution - int - multiplier used to convert log2 frequencies to an array index
-        """
-        self.log_resolution = resolution
+    def _set_cqt_params(self, note_resolution, min_freq, max_freq):
+        bins_per_octave = int(12 * note_resolution)
+        num_octaves = np.log2(max_freq/min_freq)
+        self.cqt_params = {
+            'bins_per_octave': bins_per_octave,
+            'n_bins': int(num_octaves * bins_per_octave),
+            'fmin': min_freq,
+            'hop_length': (self.audio.shape[0] // (2**int(num_octaves-1))) * (2**int(num_octaves-1))
+        }
 
-    def calculate_log_resolution(self, spectrogram):
+    def _get_max_freq(self, max_freq):
         """
-        Calculate the lowest multiplier used to convert log2 frequencies to an array index,
-        for which none of the freq->log(freq) mappings overlap in the log domain.
-        This ensures that no information is lost when mapping to log frequencies.
+        Calculate max frequency
         """
-        res = 0
-        top_n = 10 ** np.arange(1, math.ceil(np.log10(spectrogram.shape[1])))
-        top_n = np.append(top_n, spectrogram.shape[1]-1)
-        for n in top_n:
-            print(f'Finding the lowest resolution multiplier for which the top {n} '
-                  'log frequencies do not overlap...')
-            logs_overlap = True
-            while logs_overlap:
-                res+=1
-                logs_overlap = False
-                for i in range(0, n):
-                    logs_overlap = logs_overlap or (
-                        self._idx_to_logidx(self.spectrogram.shape[1]-i, resolution=res) == \
-                        self._idx_to_logidx(self.spectrogram.shape[1]-i-1, resolution=res))
-            print('Resolution multiplier found:', res)
-        return res
+        if max_freq is None:
+            max_freq = 10 * self.fundamental_freq
+        elif max_freq == -1:
+            max_freq = self.nyquist
+        return max_freq
+    
+    def _get_min_freq(self, min_freq, cqt):
+        """
+        Calculate min frequency
+        """
+        if min_freq is None:
+            if cqt:
+                min_freq = self.cqt_params['fmin']
+            else:
+                min_freq = 0
+        return min_freq
 
-    def _idx_to_freq(self, idx):
-        return idx*self.hz_per_idx
-    def _freq_to_idx(self, freq):
-        return int(freq/self.hz_per_idx)
-    def _freq_to_log(self, freq):
-        return np.log2(freq)
-    def _log_to_logidx(self, log_freq, **kwargs):
-        resolution = kwargs.get('resolution', self.log_resolution)
-        return int(log_freq * resolution)
-    def _idx_to_logidx(self, idx, **kwargs):
-        return self._log_to_logidx(self._freq_to_log(self._idx_to_freq(idx)), **kwargs) 
-
-    def plot_spectrogram(self, spectrogram, title='', figsize=(10, 6), log_scale=False,
-                         min_freq=0, max_freq='default', **kwargs):
+    def plot_spectrogram(self, spectrogram, spec_thresh=0, min_freq=None, max_freq=None,
+                         title='', figsize=(10, 6), ax=None, y_harm=None, cqt=False,
+                         **kwargs):
         """
         Plot a spectrogram
         
         Args:
             spectrogram - np.array - spectrogram to plot
-            title - str - plot title
-            figsize - tuple - (width, height)
-            log_scale - bool - whether to label the y axis on a log scale
+            spec_thresh - minimum spectrogram threshold to plot
             min_freq - numeric - plot minimum frequency
             max_freq - numeric - plot maximum frequency - 'default' uses 10x the fundamental
+            title - str - plot title
+            figsize - tuple - (width, height)
+            ax - matplotlib ax
+            y_harm - whether to use harmonic frequencies as y axis labels
+            cqt - bool - whether the spectrogram frequencies are on a cqt scale
         """
-        min_freq, max_freq, ymin, ymax = \
-            self._get_plot_ylim(spectrogram, min_freq, max_freq, log_scale)
-        if kwargs.get('ax') is not None:
-            if kwargs.get('fig') is not None:
-                fig, ax = kwargs['fig'], kwargs['ax']
-            else:
-                raise(ValueError('Both fig and ax must be specified, or not at all'))
-        else:
-            fig, ax = plt.subplots(nrows=1, ncols=1, figsize=figsize)
-        cax = ax.matshow(
-            spectrogram.T[ymin:ymax],
-            interpolation="nearest",
-            aspect="auto",
+        if cqt and (self.cqt_params is None):
+            raise(ValueError('CQT transform has not yet been called'))
+        max_freq = self._get_max_freq(max_freq)
+        min_freq = self._get_min_freq(min_freq, cqt)
+        plt.figure(figsize=figsize)
+        cax = librosa.display.specshow(
+            librosa.amplitude_to_db(np.abs(spectrogram)).clip(min=spec_thresh),
+            sr=self.sampling_rate,
             cmap=plt.cm.afmhot,
-            origin="lower"
+            y_axis='cqt_hz' if cqt else 'hz',
+            ax=ax,
+            bins_per_octave=self.cqt_params['bins_per_octave'] if cqt else None,
+            fmin=self.cqt_params['fmin'] if cqt else None,
+            hop_length=self.cqt_params['hop_length'] if cqt else None,
+            **kwargs
         )
-        ax.get_xaxis().set_visible(False)
+        plt.ylim(min_freq, max_freq)
+        plt.title(title)
+        plt.colorbar(format='%+2.0f dB')
         # Change yticks
-        if not log_scale:
-            y_step = self.fundamental_freq * int((max_freq-min_freq) / (10*self.fundamental_freq))
-            ytick_freqs = range(y_step, max_freq+1, y_step)
-            ax.set_yticks([self._freq_to_idx(x) for x in ytick_freqs])
-        else:
-            y_step = self.fundamental_freq
-            first_fundamental = self.fundamental_freq * (1 + (min_freq//self.fundamental_freq))
-            nth_fundamental =  min(max_freq, first_fundamental+(y_step*10))
-            ytick_freqs = range(first_fundamental, nth_fundamental+1, y_step)
-            ax.set_yticks([self._log_to_logidx(self._freq_to_log(x)) for x in ytick_freqs])
-        ax.set_yticklabels(ytick_freqs)
-        ax.set_title(title)
-        ax.set_ylabel('Frequency (Hz)')
-        fig.tight_layout()
-        if not kwargs.get('ax'):
-            fig.colorbar(cax)
-            plt.show()
-
-    def _get_plot_ylim(self, spectrogram, min_freq, max_freq, log_scale):
-        """
-        Calculate a spectrogram's bounding indices from bounding frequencies
-        
-        Args:
-            spectrogram - np.array - spectrogram for which to calculate indices
-            min_freq - float - minimum frequency to find index for
-            max_freq - float - maximum frequency to find index for
-            log_scale - bool - whether or not the spectrogram frequencies are on a log scale
-        """
-        if log_scale:
-            if min_freq <= 1:
-                min_freq = 0
-                ymin = 0
+        if y_harm is not None:
+            y_min = self.fundamental_freq * ((min_freq // self.fundamental_freq)+1)
+            if cqt:
+                y_max = self.fundamental_freq * y_harm
+                y_step = self.fundamental_freq
             else:
-                ymin = self._log_to_logidx(self._freq_to_log(min_freq))
-            if max_freq == 'default' or max_freq == -1:
-                max_freq = self.nyquist
-                ymax = -1
-            else:
-                ymax = self._log_to_logidx(self._freq_to_log(max_freq))
-        else:
-            ymin = spectrogram.shape[1] * min_freq // self.nyquist
-            if max_freq == 'default':
-                max_freq = 10 * self.fundamental_freq
-                ymax = spectrogram.shape[1] * max_freq // self.nyquist
-            elif max_freq == -1:
-                max_freq = self.nyquist
-                ymax = -1
-            else:
-                ymax = spectrogram.shape[1] * max_freq // self.nyquist
-        return min_freq, max_freq, ymin, ymax
+                y_max = self.fundamental_freq * (max_freq // self.fundamental_freq)
+                y_step = (y_max - y_min) / 9
+            ytick_freqs = range(int(y_min), int(y_max)+1, int(y_step))
+            plt.yticks(ytick_freqs)
+        plt.show()
     
     # Convolutions
     def convolve_spectrogram(self, spectrogram):
@@ -392,9 +332,9 @@ class AudioFile:
         Unravel the spectrogram, apply 1-D conv to it then 'ravel' it back
         """
         self._get_harmonic_groups(spectrogram)
-        self.spectrogram_conv = np.ones(spectrogram.shape)[:, ::2] # * -8
+        self.spectrogram_conv = np.ones(spectrogram.shape)[::2] # * -8
         mask = [1, 1]
-        for t in range(spectrogram.shape[0]):
+        for t in range(spectrogram.shape[1]):
             # Time slice to apply convolution to
             spectrogram_slice = spectrogram[t]
             # Convolve each group of harmonics
@@ -408,7 +348,7 @@ class AudioFile:
         """
         Create groups of harmonic frequencies to unwrap the spectrogram
         """
-        max_freq = spectrogram.shape[1]
+        max_freq = spectrogram.shape[0]
         self.harmonic_groups = []
         for freq in list(range(1, max_freq//2, 2)):
             neighbours = []
