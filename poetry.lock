@@ -94,7 +94,7 @@ toml = ["toml"]
 category = "main"
 description = "Composable style cycles"
 name = "cycler"
-optional = true
+optional = false
 python-versions = "*"
 version = "0.10.0"
 
@@ -364,7 +364,7 @@ traitlets = "*"
 category = "main"
 description = "A fast implementation of the Cassowary constraint solver"
 name = "kiwisolver"
-optional = true
+optional = false
 python-versions = ">=3.6"
 version = "1.2.0"
 
@@ -413,7 +413,7 @@ version = "1.1.1"
 category = "main"
 description = "Python plotting package"
 name = "matplotlib"
-optional = true
+optional = false
 python-versions = ">=3.6"
 version = "3.2.1"
 
@@ -1019,7 +1019,7 @@ testing = ["jaraco.itertools", "func-timeout"]
 eda = ["jupyter", "seaborn"]
 
 [metadata]
-content-hash = "8332c4e3bc4410f65954c50fb8fdbdcf200590fd24a9ec0d924a5fb0e2146139"
+content-hash = "d7edc16fd8aef1fe7370e41b7cb80f757c761ac1f5902e5ea786c45cfcdcf4d6"
 python-versions = "^3.7"
 
 [metadata.files]
