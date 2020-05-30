@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "audio"
+name = "audiolib"
 version = "0.1.0"
 description = ""
 authors = ["Julian Ferry <julianferry94@gmail.com>"]
