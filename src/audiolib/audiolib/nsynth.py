@@ -14,13 +14,28 @@ audio_ = import_module(f'{pkg}.audio')
 
 
 class AudioDataset:
+    """
+    Loads audio file names and metadata from an NSynth dataset.
 
-    def __init__(self, path='../data/raw/nsynth-train/'):
+    Methods:
+    --------
+    __init__:
+        Load dataset file names and metadata
+    load_file:
+        Load audio file from the dataset as an AudioFile object
+    """
+
+    def __init__(
+        self,
+        path: str = '../data/raw/nsynth-train/'
+    ):
         """
         Load the file names and metadata in the specified NSynth directory
 
         Args:
-            path - str or pathlib.Path - path to the dataset folder
+        -----
+        path: str or pathlib.Path
+            Path to the NSynth dataset folder
         """
         self.path = path if type(path) is Path else Path(path)
         # Metadata
@@ -43,26 +58,42 @@ class AudioDataset:
         self.file_counts = {instr: len(self.file_names[instr])
                             for instr in self.unique_instruments}
 
-    def _check_instrument(self, instrument):
+    def _check_instrument(
+        self,
+        instrument: str
+    ):
         """
-        Check that an instrument name (str) exists in the dataset
+        Check that the instrument name exists in the dataset
         """
         if instrument not in self.unique_instruments:
             raise(ValueError('Instrument {} is not one of {}'.format(
                 instrument, self.unique_instruments)))
 
-    def load_file(self, file_name=None, instrument=None, file_index=None):
+    def load_file(
+        self,
+        file_name: str = None,
+        instrument: str = None,
+        file_index: int = None
+    ):
         """
-        Returns the path of an audio file in the dataset.
-        There are two ways of loading a file path:
-            - Either specify file_name to fetch an NSynth file path by name
+        Loads an audio file from the dataset as an AudioFile object.
+        There are two ways of loading a file:
+            - Either specify file_name to fetch an NSynth file by name
             - Alternatively, restrict files to those starting with the `instrument` string
               and use `file_index` to reference the file index within that subset of files
 
         Args:
-            file_name - str - name of the audio file
-            instrument - str - must match one of the AudioDataset's unique_instruments
-            file_index - int - index of the file within that instrument's file_names
+        -----
+        file_name: str
+            Name of the audio file
+        instrument: str
+            Must match one of the AudioDataset's unique_instruments
+        file_index: int
+            Index of the file within that instrument's file_names
+
+        Returns:
+        --------
+        audiofile - audiolib.AudioFile
         """
         if file_name is not None:
             file = Path(file_name + '.wav')
@@ -80,20 +111,31 @@ class AudioDataset:
 class AudioFile:
     """
     Loads audio data and metadata from an NSynth dataset.
-    Stores audio data as an Audio object, which contains methods for audio analysis.
+    The main way to interact with the AudioFile is to via its audio attribute,
+    an Audio object which defines methods to analyse audio waveforms.
 
     Methods:
-        __init__ - load audio data from a .wav file
-        reload() - reload Audio object to undo any processing applied to it
+    --------
+    __init__:
+        Stores audio data from a .wav file as an audio object
+    reload:
+        Reload Audio raw data (removes any previously applied processing)
     """
 
-    def __init__(self, path, info):
+    def __init__(
+        self,
+        path: str,
+        info: dict
+    ):
         """
         Load audio data from .wav file
 
         Args:
-            path - str or Pathlib.path - path to the audio .wav file
-            info - dict - example metadata from the NSynth dataset
+        -----
+        path: str
+            Path to the audio .wav file
+        info: dict
+            NSynth metadata (from examples.json)
         """
         self.path = path
         self.info = info
@@ -103,8 +145,8 @@ class AudioFile:
 
     def reload(self):
         """
-        Load audio from the path specified in __init__
-        Automatically called on class creation
+        Reload raw audio data from the path specified on object creation.
+        Automatically called on object creation.
         """
         sampling_rate, audio = wavfile.read(self.path)
         if self.info.get('pitch'):

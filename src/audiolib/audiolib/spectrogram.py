@@ -17,23 +17,49 @@ class Spectrogram(np.ndarray):
     and defines methods to display and process spectrograms and convert them to audio.
 
     Methods:
-        plot - plot the spectrogram as an image
-        plot_fft - plot a time bin of the spectrogram as an FFT line plot
-        filter_harmonics - filter out all non-harmonic frequencies from the spectrogram
-        to_audio - convert a spectrogram back to an audio waveform
-        convolve_spectrogram (experimental) - apply non-continuous 1-D convolution
+    --------
+    plot:
+        Plot the spectrogram as an image
+    plot_fft:
+        Plot a time bin of the spectrogram as an FFT line plot
+    filter_harmonics:
+        Filter out all non-harmonic frequencies from the spectrogram
+    to_audio:
+        Convert a spectrogram back to an audio waveform
+    convolve_spectrogram: (experimental)
+        Apply non-continuous 1-D convolution
     """
 
-    def __new__(cls, array, sampling_rate, fundamental_freq=None, cqt=False, params={}):
+    # Numpy methods
+
+    def __new__(
+        cls,
+        array: np.array,
+        sampling_rate: int,
+        fundamental_freq: int = None,
+        cqt: bool = False,
+        params: dict = None
+    ):
         """
         Cast numpy array to Spectrogram object and set object __dict__ attributes
+
+        Args:
+        -----
+        sampling_rate: int
+            Sampling rate of the original audio data
+        fundamental_freq: int or float
+            Audio fundamental frequency in Hz
+        cqt: bool
+            If the spectrogram is a CQT with frequencies on the log2 scale
+        params: dict
+            Parameters used to create the spectrogram (hop_length or cqt_params)
         """
         obj = np.asarray(array).view(cls)
         obj.sampling_rate = sampling_rate
         obj.nyquist = sampling_rate / 2
         obj.fundamental_freq = fundamental_freq
         obj.cqt = cqt
-        obj.params = params
+        obj.params = {} if params is None else params
         return obj
 
     def __array_finalize__(self, obj):
@@ -54,26 +80,60 @@ class Spectrogram(np.ndarray):
         else:
             self.nyquist = None
 
+    def __reduce__(self):
+        """
+        Add __dict__ attributes to the pickled object for `pickle.dump` calls
+        """
+        pickled_state = super().__reduce__()
+        attrs = (self.sampling_rate, self.fundamental_freq, self.cqt, self.params)
+        new_state = pickled_state[2] + attrs
+        return (pickled_state[0], pickled_state[1], new_state)
+
+    def __setstate__(self, state):
+        """
+        Load __dict__ attributes from pickled objects for `pickle.load` calls
+        """
+        self.sampling_rate, self.fundamental_freq, self.cqt, self.params = state[-4:]
+        self.nyquist = self.sampling_rate / 2
+        super().__setstate__(state[0:-4])
+
     # Spectrogram methods
-    def plot(self, db_thresh=0, fmin=None, fmax=None,
-             axis_harm=None, title=None, figsize=(10, 6), **kwargs):
+
+    def plot(
+        self,
+        db_thresh: int = 0,
+        fmin: float = None,
+        fmax: float = None,
+        axis_harm: int = None,
+        title: str = None,
+        figsize: tuple = (10, 6),
+        **kwargs
+    ):
         """
         Plot a spectrogram as a matplotlib color mesh
 
         Args:
-            db_thresh - minimum spectrogram amplitude to plot
-            fmin - numeric - minimum frequency to plot
-            fmax - numeric - maximum frequency to plot (defaults 10x the fundamental)
-            axis_harm - whether to use harmonic frequencies as y axis labels
-            title - str - plot title
-            figsize - tuple - (width, height)
-            ax - matplotlib ax
+        -----
+        db_thresh: int
+            Minimum spectrogram decibel amplitude to plot
+        fmin: float
+            Minimum frequency to plot
+        fmax: float
+            Maximum frequency to plot (defaults 10x the fundamental)
+        axis_harm: bool
+            Whether to use harmonic frequencies as y axis labels
+        title: str
+            Plot title
+        figsize: tuple (width: int, height: int)
+            Plot dimensions
+        **kwargs:
+            Matplotlib plot kwargs (e.g ax)
         """
         # Params
         fmin = self._get_fmin(fmin)
         fmax = self._get_fmax(fmax)
-        kwargs['hop_length'] = self.params['hop_length']
         if self.cqt:
+            kwargs['hop_length'] = self.params['hop_length']
             kwargs['bins_per_octave'] = self.params['bins_per_octave']
             kwargs['fmin'] = self.params['fmin']
         # Plot
@@ -104,19 +164,37 @@ class Spectrogram(np.ndarray):
                      'frequency was not set when creating the spectrogram')
         plt.show()
 
-    def plot_fft(self, fmin=None, fmax=-1, axis_harm=None, time_bin=0,
-                 title=None, figsize=(15, 4), **kwargs):
+    def plot_fft(
+        self,
+        fmin: float = None,
+        fmax: float = -1,
+        axis_harm: int = None,
+        time_bin: int = 0,
+        title: str = None,
+        figsize: tuple = (15, 4),
+        **kwargs
+    ):
         """
         Plot a fft as a matplotlib line plot
 
         Args:
-            fmin - numeric - plot minimum frequency
-            fmax - numeric - plot maximum frequency - 'default' uses 10x the fundamental
-            axis_harm - whether to use harmonic frequencies as y axis labels
-            time_bin - which time bin of the spectrogram to plot
-            title - str - plot title
-            figsize - tuple - (width, height)
-            ax - matplotlib ax
+        -----
+        fmin: int or float
+            Plot minimum frequency
+        fmax: int or float
+            Plot maximum frequency. None uses 10x the fundamental if it was set,
+            otherwise defaults to the nyquist frequency.
+        axis_harm: bool or int
+            For an STFT: Whether to use harmonic frequencies as y axis labels
+            For a CQT: How many harmonic frequencies to use as y axis labels
+        time_bin: int
+            Which time bin of the spectrogram to plot
+        title: str
+            Plot title
+        figsize: tuple (width: int, height: int)
+            Plot dimensions
+        **kwargs:
+            Matplotlib plot kwargs (e.g ax)
         """
         # Params
         fmax = self._get_fmax(fmax)
@@ -157,15 +235,22 @@ class Spectrogram(np.ndarray):
                      'frequency was not set when creating the spectrogram')
         plt.show()
 
-    def filter_harmonics(self, neighbour_radius=0):
+    def filter_harmonics(
+        self,
+        neighbour_radius: int = 0
+    ):
         """
-        Remove non-harmonic frequency amplitudes from the spectrogram
+        Set amplitudes of the spectrogram's non-harmonic frequencies to zero
 
         Args:
-            neighbour_radius - int -  number of neighbouring frequencies to retain
+        -----
+        neighbour_radius: int
+            Number of neighbouring frequencies to keep
 
         Returns:
-            Spectrogram object
+        --------
+        spectrogram_harmonic: audiolib.Spectrogram
+            Modified version of the Spectrogram object
         """
         if self.fundamental_freq is None:
             raise(ValueError(
@@ -193,7 +278,8 @@ class Spectrogram(np.ndarray):
         Convert spectrogram to an Audio object
 
         Returns:
-            Audio object
+        --------
+        recovered_audio: audiolib.Audio
         """
         # Params
         spec = np.asarray(self)
@@ -229,7 +315,10 @@ class Spectrogram(np.ndarray):
         )
         return recovered_audio
 
-    def _get_fmin(self, fmin):
+    def _get_fmin(
+        self,
+        fmin: float
+    ):
         """
         Calculate min frequency for plotting
         """
@@ -240,7 +329,10 @@ class Spectrogram(np.ndarray):
                 fmin = 0
         return fmin
 
-    def _get_fmax(self, fmax):
+    def _get_fmax(
+        self,
+        fmax: float
+    ):
         """
         Calculate max frequency for plotting
         """
@@ -256,14 +348,23 @@ class Spectrogram(np.ndarray):
             fmax = self.params['fmin'] * 2**num_octaves
         return fmax
 
-    def _harmonic_ticks(self, fmin, fmax, axis_harm):
+    def _harmonic_ticks(
+        self,
+        fmin: float,
+        fmax: float,
+        axis_harm: int
+    ):
         """
         Returns a range of harmonic frequencies to use as plot axis labels
 
         Args:
-            fmin - numeric - minimum frequency of the plot
-            fmax - numeric - maximum frequency of the plot
-            axis_harm - int - number of harmonics to plot (for cqt plot only)
+        -----
+        fmin: int or float
+            Minimum frequency of the plot
+        fmax: int or float
+            maximum frequency of the plot
+        axis_harm:
+            Number of harmonics to plot (for CQT plot only)
         """
         axis_min = self.fundamental_freq * ((fmin // self.fundamental_freq)+1)
         axis_max = self.fundamental_freq * (fmax // self.fundamental_freq)

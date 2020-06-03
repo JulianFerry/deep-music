@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "deep-music"
+name = "audiolib"
 version = "0.1.0"
 description = ""
 authors = ["Julian Ferry <julianferry94@gmail.com>"]
@@ -8,13 +8,8 @@ authors = ["Julian Ferry <julianferry94@gmail.com>"]
 [tool.poetry.dependencies]
 python = "^3.7"
 pandas = "^1.0.1"
-jupyter = { version = "^1.0.0",  optional = true }
-audiolib = { path = "./src/audiolib" }
-torch = "^1.5.0"
-torchaudio = "^0.5.0"
-
-[tool.poetry.extras]
-eda = ["jupyter"]
+librosa = "^0.7.2"
+matplotlib = "^3.2.1"
 
 
 [tool.poetry.dev-dependencies]
