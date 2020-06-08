@@ -8,14 +8,11 @@
 !/data/**/
 !/data/**/.gitkeep
 
-# Database for local development
-/db/
-
-# Pickled objects
-pickle/
+# Logs and pickled objects
+train-output/
 
 # GCP credentials
-app/credentials/
+credentials/
 
 # Other
 /.vscode/

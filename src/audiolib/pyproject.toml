@@ -4,13 +4,11 @@ version = "0.1.0"
 description = ""
 authors = ["Julian Ferry <julianferry94@gmail.com>"]
 
-
 [tool.poetry.dependencies]
 python = "^3.7"
 pandas = "^1.0.1"
 librosa = "^0.7.2"
 matplotlib = "^3.2.1"
-
 
 [tool.poetry.dev-dependencies]
 flake8 = "^3.7.9"

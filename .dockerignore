@@ -1,0 +1,6 @@
+# Ignore everything
+**
+
+# Keep source code
+!/src/**
+/src/**/.venv

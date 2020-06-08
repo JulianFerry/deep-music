@@ -17,12 +17,13 @@ class AudioDataset:
     """
     Loads audio file names and metadata from an NSynth dataset.
 
-    Methods:
-    --------
+    Methods
+    -------
     __init__:
         Load dataset file names and metadata
     load_file:
         Load audio file from the dataset as an AudioFile object
+
     """
 
     def __init__(
@@ -30,12 +31,13 @@ class AudioDataset:
         path: str = '../data/raw/nsynth-train/'
     ):
         """
-        Load the file names and metadata in the specified NSynth directory
+        Load the file names and metadata in the specified NSynth directory.
 
-        Args:
-        -----
+        Parameters
+        ----------
         path: str or pathlib.Path
             Path to the NSynth dataset folder
+
         """
         self.path = path if type(path) is Path else Path(path)
         # Metadata
@@ -64,6 +66,7 @@ class AudioDataset:
     ):
         """
         Check that the instrument name exists in the dataset
+
         """
         if instrument not in self.unique_instruments:
             raise(ValueError('Instrument {} is not one of {}'.format(
@@ -82,8 +85,8 @@ class AudioDataset:
             - Alternatively, restrict files to those starting with the `instrument` string
               and use `file_index` to reference the file index within that subset of files
 
-        Args:
-        -----
+        Parameters
+        ----------
         file_name: str
             Name of the audio file
         instrument: str
@@ -91,9 +94,11 @@ class AudioDataset:
         file_index: int
             Index of the file within that instrument's file_names
 
-        Returns:
-        --------
+        Returns
+        -------
         audiofile - audiolib.AudioFile
+            AudioFile object with an Audio object as attribute
+
         """
         if file_name is not None:
             file = Path(file_name + '.wav')
@@ -114,12 +119,13 @@ class AudioFile:
     The main way to interact with the AudioFile is to via its audio attribute,
     an Audio object which defines methods to analyse audio waveforms.
 
-    Methods:
-    --------
+    Methods
+    -------
     __init__:
         Stores audio data from a .wav file as an audio object
     reload:
         Reload Audio raw data (removes any previously applied processing)
+
     """
 
     def __init__(
@@ -130,12 +136,13 @@ class AudioFile:
         """
         Load audio data from .wav file
 
-        Args:
-        -----
+        Parameters
+        ----------
         path: str
             Path to the audio .wav file
         info: dict
             NSynth metadata (from examples.json)
+
         """
         self.path = path
         self.info = info
@@ -147,6 +154,7 @@ class AudioFile:
         """
         Reload raw audio data from the path specified on object creation.
         Automatically called on object creation.
+
         """
         sampling_rate, audio = wavfile.read(self.path)
         if self.info.get('pitch'):

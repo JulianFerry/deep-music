@@ -19,8 +19,8 @@ class Audio(np.ndarray):
     Contains attributes specific to audio such as sampling rate and fundamental frequency,
     and defines methods to display and process audio and convert it to spectrograms.
 
-    Methods:
-    --------
+    Methods
+    -------
     plot:
         Plot the audio waveform in the time domain
     play:
@@ -31,6 +31,7 @@ class Audio(np.ndarray):
         Apply a butterworth filter (lp, hp, bp, bs) to the audio
     to_spectrogram:
         Generate a spectrogram (STFT or CQT) from the audio
+
     """
 
     # Numpy methods
@@ -42,16 +43,17 @@ class Audio(np.ndarray):
         fundamental_freq: float = None
     ):
         """
-        Cast numpy array to Audio object and set object __dict__ attributes
+        Cast a numpy array to an Audio object and set the __dict__ attributes.
 
-        Args:
-        -----
+        Parameters
+        ----------
         array: np.array
             Audio data to convert to Audio object
         sampling_rate: int
             Audio sampling rate
         fundamental_freq: int or float
              Fundamental frequency of the audio (if known)
+
         """
         obj = np.asarray(array).astype(np.float).view(cls)
         obj.sampling_rate = sampling_rate
@@ -64,8 +66,9 @@ class Audio(np.ndarray):
         """
         Numpy subclassing constructor. This gets called every time an Audio
         object is created, either by using the Audio() constructor or when
-        a method returns self.
+        an Audio method returns self.
         See https://numpy.org/devdocs/user/basics.subclassing.html
+
         """
         if obj is None: return  # noqa
         self.sampling_rate = getattr(obj, 'sampling_rate', None)
@@ -83,18 +86,20 @@ class Audio(np.ndarray):
         autoplay: bool = False
     ):
         """
-        Create widget which plays audio
+        Create widget which plays audio.
 
-        Args:
-        -----
+        Parameters
+        ----------
         autoplay: bool
             Whether to automatically play sound from the widget
+
         """
         display.display(display.Audio(self, rate=self.sampling_rate, autoplay=autoplay))
 
     def plot(self):
         """
         Plot the audio waveform
+
         """
         time = np.linspace(0., self.duration, self.shape[0])
         plt.figure(figsize=(10, 3))
@@ -111,18 +116,20 @@ class Audio(np.ndarray):
         end: float = -1
     ):
         """
-        Trim the audio start and end times (in seconds)
+        Trim the audio start and end times (in seconds).
 
-        Args:
-        -----
+        Parameters
+        ----------
         start: int or float
             Start time (seconds)
         end: int or float
             End time (seconds)
 
-        Returns:
-        --------
-        audio: audiolib.Audio
+        Returns
+        -------
+        trimmed_audio: audiolib.Audio
+            Modified version of the Audio object
+
         """
         if 0 < start < self.duration:
             start_idx = int(start * self.sampling_rate)
@@ -146,10 +153,10 @@ class Audio(np.ndarray):
         order: int = 4
     ):
         """
-        Apply a butterworth filter to the audio waveform
+        Apply a butterworth filter to the audio waveform.
 
-        Args:
-        -----
+        Parameters
+        ----------
         lowcut: int or float
             Lowest frequency
         highcut: int or float
@@ -159,9 +166,11 @@ class Audio(np.ndarray):
         order: (1, 2, 3, 4, 5)
             Complexity of the butterworth filter
 
-        Returns:
-        --------
+        Returns
+        -------
         filtered_audio: audiolib.Audio
+            Modified version of the Audio object
+
         """
         # Filter parameters
         if btype.startswith('low'):
@@ -200,10 +209,10 @@ class Audio(np.ndarray):
         fmax: float = -1
     ):
         """
-        Convert the audio waveform to a spectrogram using STFT or CQT
+        Convert the audio waveform to a spectrogram using STFT or CQT.
 
-        Args:
-        -----
+        Parameters
+        ----------
         time_intervals: int
             Number of time intervals to split the audio signal into
         resolution: int or float
@@ -218,9 +227,11 @@ class Audio(np.ndarray):
         fmax: int or float
             maximum frequency for the transform (`cqt=True` only)
 
-        Returns:
-        --------
+        Returns
+        -------
         spectrogram: audiolib.Spectrogram
+            Spectrogram with the parameters used to generate it as attributes
+
         """
         # CQT
         if cqt is True:
@@ -251,8 +262,8 @@ class Audio(np.ndarray):
         """
         Transform audio waveform data into a CQT spectrogram (log2 frequency resolution)
 
-        Args
-        ----
+        Parameters
+        ----------
         time_intervals: int
             Number of time intervals to split the audio into
         resolution: int
@@ -265,6 +276,8 @@ class Audio(np.ndarray):
         Returns
         -------
         cqt_spectrogram: Spectrogram
+            CQT Spectrogram with the parameters used to generate it as attributes
+
         """
         # Setup
         fmax = self._get_fmax(fmax)
@@ -289,15 +302,16 @@ class Audio(np.ndarray):
         mode: str = 'max'
     ):
         """
-        Get n_fft for a given frequency resolution between 0 and 1
+        Get n_fft for a given frequency resolution between 0 and 1.
 
-        Args
-        ----
+        Parameters
+        ----------
         resolution: float
             0 < r <= 1  (1 maximises frequency resolution)
         mode: ('max', 'fast')
             'max' uses the number of audio samples as n_fft
             'fast' uses the largest power of 2 smaller than the number of samples
+
         """
         if resolution > 1:
             raise(ValueError(
@@ -313,7 +327,9 @@ class Audio(np.ndarray):
         fmax: float
     ):
         """
-        Calculate max frequency for plotting
+        Calculate the default max frequency for plotting, based on the audio nyquist
+        and fundamental frequency.
+
         """
         if fmax is None:
             fmax = 10 * self.fundamental_freq
@@ -331,8 +347,8 @@ class Audio(np.ndarray):
         """
         Set the parameters to be be used the CQT transform.
 
-        Args:
-        -----
+        Parameters
+        ----------
         time_intervals: int
             Minimum number of time intervals to split the audio
         note_resolution: int
@@ -341,6 +357,7 @@ class Audio(np.ndarray):
             Minimum frequency for the CQT
         fmax: float
             Maximum frequency for the CQT
+
         """
         bins_per_octave = int(12 * note_resolution)
         num_octaves = np.log2(fmax/fmin)
