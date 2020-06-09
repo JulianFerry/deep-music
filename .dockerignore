@@ -4,3 +4,4 @@
 # Keep source code
 !/src/**
 /src/**/.venv
+/src/**/shell

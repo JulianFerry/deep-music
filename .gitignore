@@ -12,7 +12,7 @@
 train-output/
 
 # GCP credentials
-credentials/
+gcloud/credentials/
 
 # Other
 /.vscode/

@@ -6,6 +6,7 @@ RUN apt-get update && apt-get install libsndfile1 -y
 COPY src/trainer /opt/trainer
 RUN pip install -U pip && \
     pip install -r /opt/trainer/requirements.txt --trusted-host pypiserver --ignore-installed
-RUN pip install opt/trainer
+RUN pip install /opt/trainer
 
+RUN mkdir /root/data
 ENTRYPOINT ["python", "-m", "trainer"]
