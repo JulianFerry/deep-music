@@ -9,6 +9,7 @@ python = "^3.7"
 pandas = "^1.0.1"
 librosa = "^0.7.2"
 matplotlib = "^3.2.1"
+IPython = "^7.15.0"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^3.7.9"

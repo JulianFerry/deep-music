@@ -1,7 +1,9 @@
 # Ignore everything
 **
 
-# Keep source code
+# Keep source code except virtualenvs
 !/src/**
 /src/**/.venv
-/src/**/shell
+
+# Keep docker files
+!/docker
