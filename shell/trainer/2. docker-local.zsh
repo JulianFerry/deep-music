@@ -18,4 +18,5 @@ docker run --rm \
   $image_name \
     --data_dir /root/data/processed/time_intervals=1/resolution=5/ \
     --job_dir /root/train-output/ \
+    --instruments "[keyboard_acoustic, guitar_acoustic]" \
     --epochs 1

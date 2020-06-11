@@ -129,13 +129,29 @@ class Normalise(object):
         return (item - self.mean) / self.std
 
 
+def download_data(args):
+    """
+    """
+    # Authenticate with local GCP credentials if they have been mounted
+    if os.path.isdir('/root/credentials'):
+        subprocess.run(['gcloud', 'auth', 'activate-service-account',
+                        '--key-file', '/root/credentials/gs-access-key.json'])
+    # Copy data from cloud storage bucket
+    for instrument in args['instruments']:
+        subprocess.run(['gsutil', '-m', 'cp', '-r',
+                        os.path.join(args['data_dir'], instrument), '/root/data'])
+
 def load_data(args):
     """
     """
+
+    if args.get('data_dir', '').startswith('gs://'):
+        download_data(args)
+        args['data_dir'] = '/root/data'
+
     # Load dataset
     root_dir = args['data_dir']
-    instruments = ['keyboard_acoustic', 'guitar_acoustic']
-    spec_dataset = SpectrogramDataset(root_dir, instruments)
+    spec_dataset = SpectrogramDataset(root_dir, args['instruments'])
 
     # Calculate mean and std
     specs = np.hstack([spec_dataset[i][0] for i in range(len(spec_dataset))])
@@ -149,13 +165,13 @@ def load_data(args):
     ])
     label_transform = ToTensor()
     spec_dataset = SpectrogramDataset(
-        root_dir, instruments, spec_transform, label_transform)
+        root_dir, args['instruments'], spec_transform, label_transform)
     train_sampler, test_sampler = stratified_split(spec_dataset)
     train_loader = torch.utils.data.DataLoader(spec_dataset, batch_size=32,
                                                sampler=train_sampler)
-    # test_loader = torch.utils.data.DataLoader(spec_dataset, batch_size=32,
-    #                                           sampler=test_sampler)
-    return train_loader
+    test_loader = torch.utils.data.DataLoader(spec_dataset, batch_size=32,
+                                              sampler=test_sampler)
+    return train_loader, test_loader
 
 
 class Net(nn.Module):
@@ -175,8 +191,44 @@ class Net(nn.Module):
         x = x.view(-1, 32*116)                # flatten each mini-batch
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
-        x = F.softmax(self.fc3(x))
+        x = F.log_softmax(self.fc3(x))
         return x
+
+
+def validation(model, test_loader):
+    test_loss = 0
+    accuracy = 0
+    for n, (inputs, labels) in enumerate(test_loader):
+        # Loss
+        if torch.cuda.is_available():
+            inputs = inputs.to('cuda')
+        output = model.forward(inputs)
+        test_loss += F.nll_loss(output, labels).item()
+        # Acc
+        ps = torch.exp(output)
+        equality = (labels.data == ps.max(dim=1)[1])
+        accuracy += equality.type(torch.FloatTensor).mean()
+    test_loss /= n+1
+    accuracy /= n+1
+    return test_loss, accuracy
+
+
+def save_model(model, args):
+    """
+    """
+    # Define save path
+    if args.get('job_dir', '').startswith('gs://'):
+        job_dir = '/root/train-output'
+    else:
+        job_dir = args['job_dir']
+    # Save model
+    os.makedirs(job_dir, exist_ok=True)
+    torch.save(model.state_dict(), os.path.join(job_dir, 'model.pt'))
+    # Upload to cloud
+    if args.get('job_dir', '').startswith('gs://'):
+        job_dir = '/root/train-output'
+        subprocess.run(['gsutil', '-m', 'cp', '-r',
+                        '/root/train-output', args['job_dir']])
 
 
 def train_and_evaluate(args):
@@ -189,7 +241,7 @@ def train_and_evaluate(args):
         Arguments parsed by task.py when the package is called with command-line
 
     """
-    train_loader = load_data(args)
+    train_loader, test_loader = load_data(args)
 
     model = Net()
 
@@ -203,6 +255,8 @@ def train_and_evaluate(args):
 
             # Forward pass and backprop
             inputs, labels = data
+            if torch.cuda.is_available():
+                inputs = inputs.to('cuda')
             optimizer.zero_grad()
             outputs = model(inputs)
             loss = criterion(outputs, labels)
@@ -211,12 +265,14 @@ def train_and_evaluate(args):
 
             # Training log
             running_loss += loss.item()
-            if i % 100 == 99:
-                print('Epoch %d, sample %d - loss: %.3f' %
-                      (epoch + 1, i + 1, running_loss / 2000))
+            log_rate = 100
+            if i % log_rate == log_rate-1:
+                print('Epoch %d, batch %d - loss: %.3f' %
+                      (epoch + 1, i + 1, running_loss / log_rate))
                 running_loss = 0.0
 
-    os.makedirs(args['job_dir'], exist_ok=True)
-    torch.save(model.state_dict(), os.path.join(args['job_dir'], 'model.pt'))
-
     print('Finished Training')
+    print('train_loss: %.4f - train_accuracy: %.4f' % validation(model, train_loader))
+    print('val_loss: %.4f - val_accuracy: %.4f' % validation(model, test_loader))
+
+    save_model(model, args)

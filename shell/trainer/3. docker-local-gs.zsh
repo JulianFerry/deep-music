@@ -21,4 +21,5 @@ docker run --rm \
   $IMAGE_URI \
     --data_dir gs://$BUCKET_NAME/data/processed/time_intervals=1/resolution=5/ \
     --job_dir /root/train-output/ \
+    --instruments "[keyboard_acoustic, guitar_acoustic]" \
     --epochs 1

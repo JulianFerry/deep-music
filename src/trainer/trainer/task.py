@@ -22,6 +22,12 @@ def get_args():
         type=int,
         default=1
     )
+    parser.add_argument(
+        '--instruments',
+        help='Instruments to classify in the model',
+        type=str,
+        default='[*]'
+    )
 
     # Paths
     parser.add_argument(
@@ -36,19 +42,8 @@ def get_args():
     # Parse
     args = parser.parse_args()
     args = args.__dict__
-
-    # Mount data from cloud storage bucket if necessary
-    if args.get('data_dir', '').startswith('gs://'):
-            bucket_name = args['data_dir'][5:].split('/')[0]
-            cmd_gcsfuse = ['gcsfuse', '--implicit-dirs', bucket_name, '/root/data']
-            # Use local GCP credentials if they have been mounted
-            if os.path.isdir('/root/credentials'):
-                cmd_gcsfuse.insert(-2, '--key-file')
-                cmd_gcsfuse.insert(-2, '/root/credentials/gs-access-key.json')
-            subprocess.run(cmd_gcsfuse)
-            split_path = args['data_dir'][5:].split('/')[1:]
-            args['data_dir'] = '/'.join(['/root/data'] + split_path)
- 
+    args['instruments'] = args['instruments'].strip('[]').replace(' ', '').split(',')
+    
     return args
 
 

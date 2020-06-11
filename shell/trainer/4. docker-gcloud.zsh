@@ -19,8 +19,8 @@ export JOB_NAME=${package_name}_$(date +%Y%m%d_%H%M%S);
 gcloud ai-platform jobs submit training $JOB_NAME \
   --region $REGION \
   --master-image-uri $IMAGE_URI \
-  --container-PRIVILEGED \
   -- \
     --data_dir=gs://$BUCKET_NAME/data/processed/time_intervals=1/resolution=5/ \
     --job_dir=gs://$BUCKET_NAME/train-output/$JOB_NAME \
+    --instruments "[keyboard_acoustic, guitar_acoustic]" \
     --epochs=10
