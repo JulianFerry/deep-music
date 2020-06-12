@@ -16,9 +16,14 @@ echo "Generating requirements.txt for $package_name"
 ( cd $project_path/src/$package_name && \
   poetry export --without-hashes -f requirements.txt > requirements.txt );
 pypiserver_url="--extra-index-url http:\/\/pypiserver:8080"
-sed -i "1 s/.*/$pypiserver_url/" src/trainer/requirements.txt
-sed -i "/torch==1.4.0/d" src/trainer/requirements.txt
-sed -i "/torchvision==0.5.0/d" src/trainer/requirements.txt
+if head -1 src/$package_name/requirements.txt | grep -q Warning; then
+    >&2 head -1 src/$package_name/requirements.txt;
+    return 1
+else
+    sed -i "1 s/.*/$pypiserver_url/" src/$package_name/requirements.txt
+fi
+sed -i "/torch==1.4.0/d" src/$package_name/requirements.txt
+sed -i "/torchvision==0.5.0/d" src/$package_name/requirements.txt
 
 # Stop and remove project container if it exists. Remove image if it exists
 echo "Removing container $container_name and image $image_name"

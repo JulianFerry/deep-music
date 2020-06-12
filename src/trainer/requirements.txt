@@ -24,9 +24,9 @@ jedi==0.17.0
 joblib==0.15.1
 kiwisolver==1.2.0
 librosa==0.7.2
-llvmlite==0.33.0
+llvmlite==0.31.0
 matplotlib==3.2.1
-numba==0.50.0
+numba==0.48.0
 numpy==1.18.5
 pandas==1.0.4
 parso==0.7.0
@@ -45,7 +45,7 @@ python-dateutil==2.8.1
 pytz==2020.1
 requests==2.23.0
 resampy==0.2.2
-rsa==4.2; python_version >= "3"
+rsa==4.4.1; python_version >= "3"
 scikit-learn==0.23.1
 scipy==1.4.1
 six==1.15.0

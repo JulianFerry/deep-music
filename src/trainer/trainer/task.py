@@ -42,8 +42,6 @@ def get_args():
     args = parser.parse_args()
     args = args.__dict__
     args['instruments'] = args['instruments'].strip('[]').replace(' ', '').split(',')
-    args['job_dir'] = Path(args['job_dir'])
-    args['data_dir'] = Path(args['data_dir'])
 
     return args
 

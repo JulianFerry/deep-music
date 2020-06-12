@@ -1,10 +1,12 @@
 import numpy as np
 import pickle
 import os
+from pathlib import Path
 
 import torch
 from torch.utils.data import Dataset, DataLoader
 from torch.utils.data.sampler import SubsetRandomSampler
+from torchvision import transforms
 
 from . import gsutil
 
@@ -127,7 +129,7 @@ def stratified_split(dataset, split=0.8, seed=42):
     return train_sampler, test_sampler
 
 
-def load_data(data_dir, intstruments):
+def load_data(data_dir, instruments):
     """
     Create PyTorch data loader from data in data_dir
 
@@ -137,9 +139,9 @@ def load_data(data_dir, intstruments):
         gs_path = data_dir
         data_dir = '/root/data'
         for instrument in instruments:
-            gsutil.download(gs_path/instrument, data_dir)
+            gsutil.download(os.path.join(gs_path, instrument), data_dir)
     # Load dataset
-    spec_dataset = SpectrogramDataset(root_dir, instruments)
+    spec_dataset = SpectrogramDataset(data_dir, instruments)
     # Calculate mean and std
     specs = np.hstack([spec_dataset[i][0] for i in range(len(spec_dataset))])
     mean = specs.mean()
@@ -151,7 +153,7 @@ def load_data(data_dir, intstruments):
     ])
     label_transform = ToTensor()
     spec_dataset = SpectrogramDataset(
-        root_dir, instruments, spec_transform, label_transform)
+        data_dir, instruments, spec_transform, label_transform)
     # PyTorch data loaders (train/test split)
     train_sampler, test_sampler = stratified_split(spec_dataset)
     train_loader = DataLoader(spec_dataset, batch_size=32, sampler=train_sampler)

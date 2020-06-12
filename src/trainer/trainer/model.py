@@ -7,13 +7,14 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 
+from .callbacks import _PrintCallback
 from . import gsutil
 
 
 class MusicNet(nn.Module):
 
     def __init__(self):
-        super.__init__()
+        super().__init__()
         self.pool = nn.MaxPool1d(2, 2)
         self.conv1 = nn.Conv1d(1, 16, 5)
         self.conv2 = nn.Conv1d(16, 32, 5)
@@ -27,14 +28,15 @@ class MusicNet(nn.Module):
         x = x.view(-1, 32*116)                # flatten each mini-batch
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
-        x = F.log_softmax(self.fc3(x))
+        x = F.log_softmax(self.fc3(x), dim=1)
         return x
 
-    def compile(criterion, optimizer):
+    def compile(self, criterion, optimizer):
         self.criterion = criterion
         self.optimizer = optimizer
 
     def fit(
+        self,
         train_loader,
         val_loader=None,
         epochs=1,
@@ -46,20 +48,20 @@ class MusicNet(nn.Module):
 
         """
         if verbose == 1:
-            callbacks.append(PrintCallback())
+            callbacks.append(_PrintCallback(epochs, len(train_loader)))
         # Training loop
         for epoch in range(epochs):
             train_loss = 0.0
             train_acc = 0.0
             for cb in callbacks:
-                cb.on_epoch_start(epoch)
+                cb.on_epoch_start(epoch + 1)
             # Forward pass and backprop
             for batch, data in enumerate(train_loader, 0):
                 inputs, labels = data
                 if torch.cuda.is_available():
                     inputs = inputs.to('cuda')
                 self.optimizer.zero_grad()
-                outputs = model(inputs)
+                outputs = self.forward(inputs)
                 loss = self.criterion(outputs, labels)
                 loss.backward()
                 self.optimizer.step()
@@ -68,12 +70,12 @@ class MusicNet(nn.Module):
                     train_loss *= batch / (batch + 1)
                     train_loss += loss.item() / (batch + 1)
                     train_acc *= batch / (batch + 1)
-                    train_acc += evaluate(outputs, labels) / (batch + 1)
+                    train_acc += self.evaluate(outputs, labels) / (batch + 1)
                     logs = {'batch_loss/train': train_loss,
                             'batch_acc/train': train_acc}
-                    batch_num = epoch * len(train_loader) + batch + 1
+                    batch_total = epoch * len(train_loader) + batch + 1
                     for cb in callbacks:
-                        cb.on_batch_end(batch_num, train_loss)
+                        cb.on_batch_end(batch + 1, batch_total, logs)
             # Epoch end
             with torch.no_grad():
                 logs = {'epoch_loss/train': train_loss,
@@ -124,41 +126,5 @@ class MusicNet(nn.Module):
         os.makedirs(path_tmp, exist_ok=True)
         torch.save(self.state_dict(), os.path.join(path_tmp, 'model.pt'))
         if path.startswith('gs://'):
-            gsutil.upload(path_tmp/'*', path])
+            gsutil.upload(os.path.join(path_tmp, '*'), path)
         print('Saved model to:', path)
-
-
-class PrintCallback:
-
-    def __init__(self):
-        pass
-
-    def on_train_start(self):
-        pass
-
-    def on_epoch_start(self, epoch):
-        print(f'Epoch {epoch}:')
-
-    def on_batch_end(self, batch, logs):
-        print('Batch %d', end ='')
-        _print_logs('batch', 'train', end='\r')
-
-    def on_epoch_end(self, epoch, logs):
-        print('\nEpoch finished:')
-        for dataset in ['train', 'val']:
-            _print_logs('epoch', dataset, end='\n')
-    
-    def on_train_end(self):
-        print('Training finished.')
-
-    def _print_logs(self, stage, dataset, end):
-        # Loss
-        key = f'{stage}_loss/{dataset}'
-        if logs.get(key):
-            print(f'{dataset}_loss: {logs[key]:.3f}', end=''))
-        # Accuracy
-        key = f'{stage}_acc/{dataset}'
-        if logs.get(key):
-            print(f' - {dataset}_accuracy: {logs[key]:.3f}', end=''))
-        print('', end=end)
-
