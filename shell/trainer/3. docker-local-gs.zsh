@@ -9,9 +9,17 @@ container_name=$project_name-$package_name;
 PROJECT_ID=$(gcloud config list project --format "value(core.project)")
 IMAGE_REPO_NAME=$container_name
 IMAGE_TAG=latest
+BUCKET_NAME=deep-musik-data
+IMAGE_URI=eu.gcr.io/$PROJECT_ID/$IMAGE_REPO_NAME:$IMAGE_TAG
 
-export BUCKET_NAME=deep-musik-data
-export IMAGE_URI=eu.gcr.io/$PROJECT_ID/$IMAGE_REPO_NAME:$IMAGE_TAG
+# Rebuild image if arg is set
+for arg in $@
+do
+  case $arg in
+    -r|--rebuild)
+      ( cd $project_path && . docker/$package_name/docker-build.zsh );;
+    esac
+done
 
 # Run with cloud storage credentials as a volume
 docker run --rm \
@@ -20,6 +28,6 @@ docker run --rm \
   --name $container_name \
   $IMAGE_URI \
     --data_dir gs://$BUCKET_NAME/data/processed/time_intervals=1/resolution=5/ \
-    --job_dir /root/train-output/ \
-    --instruments "[keyboard_acoustic, guitar_acoustic]" \
+    --job_dir gs://$BUCKET_NAME/train-output/local \
+    --instruments "[brass_electronic, string_electronic]" \
     --epochs 1

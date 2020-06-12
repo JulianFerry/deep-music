@@ -11,6 +11,15 @@ IMAGE_REPO_NAME=$container_name
 IMAGE_TAG=latest
 image_name=eu.gcr.io/$PROJECT_ID/$IMAGE_REPO_NAME:$IMAGE_TAG
 
+# Rebuild image if arg is set
+for arg in $@
+do
+  case $arg in
+    -r|--rebuild)
+      ( cd $project_path && . docker/$package_name/docker-build.zsh );;
+  esac
+done
+
 # Run with local data as a mounted volume
 docker run --rm \
   --volume $project_path/data/:/root/data/ \

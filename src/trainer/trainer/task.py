@@ -1,7 +1,6 @@
 import argparse
-import os
-import subprocess
-from . import model
+from pathlib import Path
+from . import trainer
 
 
 def get_args():
@@ -43,7 +42,9 @@ def get_args():
     args = parser.parse_args()
     args = args.__dict__
     args['instruments'] = args['instruments'].strip('[]').replace(' ', '').split(',')
-    
+    args['job_dir'] = Path(args['job_dir'])
+    args['data_dir'] = Path(args['data_dir'])
+
     return args
 
 
@@ -51,4 +52,4 @@ if __name__ == '__main__':
     # Parse command-line arguments
     args = get_args()
     # Run the training job
-    model.train_and_evaluate(args)
+    trainer.train_and_evaluate(args)
