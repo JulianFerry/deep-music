@@ -16,7 +16,7 @@ for arg in $@
 do
   case $arg in
     -r|--rebuild)
-      ( cd $project_path && . docker/$package_name/docker-build.zsh );;
+      ( cd $project_path && . docker/$package_name/docker-build.zsh ) || return 1;;
   esac
 done
 

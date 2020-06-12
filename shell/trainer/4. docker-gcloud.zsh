@@ -16,12 +16,11 @@ export IMAGE_URI=eu.gcr.io/$PROJECT_ID/$IMAGE_REPO_NAME:$IMAGE_TAG
 export JOB_NAME=${package_name}_$(date +%Y%m%d_%H%M%S);
 
 # Rebuild and/or push image if args are set
-# Rebuild image if arg is set
 for arg in $@
 do
   case $arg in
     -r|--rebuild)
-      ( cd $project_path && . docker/$package_name/docker-build.zsh );;
+      ( cd $project_path && . docker/$package_name/docker-build.zsh ) || return 1;;
     -p|--push)
       docker push $IMAGE_URI
   esac
@@ -35,4 +34,4 @@ gcloud ai-platform jobs submit training $JOB_NAME \
     --data_dir=gs://$BUCKET_NAME/data/processed/time_intervals=1/resolution=5/ \
     --job_dir=gs://$BUCKET_NAME/train-output/$JOB_NAME \
     --instruments "[keyboard_acoustic, guitar_acoustic]" \
-    --epochs=10
+    --epochs=100
