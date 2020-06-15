@@ -9,8 +9,8 @@ from warnings import warn
 
 # Fix circular imports with absolute import
 from importlib import import_module
-pkg = __name__.split('.')[0]
-audio_ = import_module(f'{pkg}.audio')
+_pkg = __name__.split('.')[0]
+_audio = import_module(f'{_pkg}.audio')
 
 
 class AudioDataset:
@@ -161,4 +161,4 @@ class AudioFile:
             fundamental_freq = librosa.midi_to_hz(self.info['pitch'])
         else:
             fundamental_freq = None
-        self.audio = audio_.Audio(audio, sampling_rate, fundamental_freq)
+        self.audio = _audio.Audio(audio, sampling_rate, fundamental_freq)

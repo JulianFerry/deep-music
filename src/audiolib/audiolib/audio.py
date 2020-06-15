@@ -9,8 +9,8 @@ from scipy.signal import butter, lfilter
 
 # Fix circular imports with absolute import
 from importlib import import_module
-pkg = __name__.split('.')[0]
-spec_ = import_module(f'{pkg}.spectrogram')
+_pkg = __name__.split('.')[0]
+_spec = import_module(f'{_pkg}.spectrogram')
 
 
 class Audio(np.ndarray):
@@ -244,7 +244,7 @@ class Audio(np.ndarray):
             n_fft=n_fft,
             hop_length=hop_length,
         )
-        spectrogram = spec_.Spectrogram(
+        spectrogram = _spec.Spectrogram(
             spectrogram,
             self.sampling_rate,
             self.fundamental_freq,
@@ -287,7 +287,7 @@ class Audio(np.ndarray):
             sr=self.sampling_rate,
             **cqt_params,
         )
-        spectrogram = spec_.Spectrogram(
+        spectrogram = _spec.Spectrogram(
             spectrogram,
             self.sampling_rate,
             self.fundamental_freq,

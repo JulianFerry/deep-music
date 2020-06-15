@@ -5,8 +5,8 @@ from warnings import warn, filterwarnings
 
 # Fix circular imports with absolute import
 from importlib import import_module
-pkg = __name__.split('.')[0]
-audio_ = import_module(f'{pkg}.audio')
+_pkg = __name__.split('.')[0]
+_audio = import_module(f'{_pkg}.audio')
 
 
 class Spectrogram(np.ndarray):
@@ -322,7 +322,7 @@ class Spectrogram(np.ndarray):
             **params
         )
         filterwarnings("default", category=UserWarning)
-        recovered_audio = audio_.Audio(
+        recovered_audio = _audio.Audio(
             recovered_audio,
             self.sampling_rate,
             self.fundamental_freq
