@@ -30,4 +30,4 @@ docker run --rm \
     --data_dir gs://$BUCKET_NAME/data/processed/time_intervals=1/resolution=5/ \
     --job_dir gs://$BUCKET_NAME/train-output/local \
     --instruments "[brass_electronic, string_electronic]" \
-    --epochs 1
+    --epochs 10

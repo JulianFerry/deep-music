@@ -19,10 +19,14 @@ def train_and_evaluate(args):
     # Model definitino
     model = MusicNet()
     criterion = nn.NLLLoss()
-    optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
+    optimizer = optim.SGD(model.parameters(), lr=args['lr'], momentum=0.9)
     model.compile(criterion, optimizer)
     # Callbacks
-    tb_writer = SummaryWriterCallback(os.path.join(args['job_dir'], 'logs'))
+    hparams = {'lr': args['lr']}
+    tb_writer = SummaryWriterCallback(
+        path=os.path.join(args['job_dir'], 'logs'),
+        hparams=hparams
+    )
     callbacks = [tb_writer]
     # Data
     train_loader, test_loader = load_data(args['data_dir'], args['instruments'])

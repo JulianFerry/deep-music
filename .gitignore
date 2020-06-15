@@ -15,7 +15,7 @@ train-output/
 credentials/
 
 # Other
-/.vscode/
+.vscode
 
 
 # Python defaults

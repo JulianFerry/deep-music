@@ -16,6 +16,12 @@ def get_args():
 
     # Training arguments
     parser.add_argument(
+        '--lr',
+        help='Optimiser learning rate',
+        type=int,
+        default=0.001
+    )
+    parser.add_argument(
         '--epochs',
         help='Epochs to run the training job for',
         type=int,

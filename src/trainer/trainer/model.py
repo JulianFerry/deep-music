@@ -7,7 +7,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 
-from .callbacks import _PrintCallback
+from .callbacks import PrintCallback
 from . import gsutil
 
 
@@ -40,15 +40,16 @@ class MusicNet(nn.Module):
         train_loader,
         val_loader=None,
         epochs=1,
-        verbose=1,
+        verbosity=1,
         validation_freq=1,
         callbacks=[]
     ):
         """
 
         """
-        if verbose == 1:
-            callbacks.append(_PrintCallback(epochs, len(train_loader)))
+        callbacks.append(PrintCallback(epochs, len(train_loader), verbosity))
+        for cb in callbacks:
+            cb.on_train_start()
         # Training loop
         for epoch in range(epochs):
             train_loss = 0.0
@@ -57,6 +58,8 @@ class MusicNet(nn.Module):
                 cb.on_epoch_start(epoch + 1)
             # Forward pass and backprop
             for batch, data in enumerate(train_loader, 0):
+                for cb in callbacks:
+                    cb.on_batch_start(batch + 1)
                 inputs, labels = data
                 if torch.cuda.is_available():
                     inputs = inputs.to('cuda')
