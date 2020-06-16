@@ -600,6 +600,18 @@ python-versions = ">=3.5"
 version = "1.18.5"
 
 [[package]]
+category = "dev"
+description = "Sphinx extension to support docstrings in Numpy format"
+name = "numpydoc"
+optional = false
+python-versions = ">=3.5"
+version = "1.0.0"
+
+[package.dependencies]
+Jinja2 = ">=2.3"
+sphinx = ">=1.6.5"
+
+[[package]]
 category = "main"
 description = "Core utilities for Python packages"
 name = "packaging"
@@ -707,7 +719,7 @@ wcwidth = "*"
 [[package]]
 category = "main"
 description = "Run a subprocess in a pseudo terminal"
-marker = "sys_platform != \"win32\" or os_name != \"nt\" or python_version >= \"3.3\" and sys_platform != \"win32\""
+marker = "python_version >= \"3.3\" and sys_platform != \"win32\" or sys_platform != \"win32\" or os_name != \"nt\" or python_version >= \"3.3\" and sys_platform != \"win32\" and (python_version >= \"3.3\" and sys_platform != \"win32\" or sys_platform != \"win32\")"
 name = "ptyprocess"
 optional = false
 python-versions = "*"
@@ -1024,6 +1036,34 @@ test = ["pytest", "pytest-cov", "html5lib", "typed-ast", "cython"]
 
 [[package]]
 category = "main"
+description = "Sphinx extension for auto-generating API documentation for entire modules"
+name = "sphinx-automodapi"
+optional = false
+python-versions = "*"
+version = "0.12"
+
+[package.dependencies]
+sphinx = ">=1.7"
+
+[package.extras]
+test = ["pytest", "pytest-cov", "cython", "codecov", "coverage"]
+
+[[package]]
+category = "main"
+description = "Read the Docs theme for Sphinx"
+name = "sphinx-rtd-theme"
+optional = false
+python-versions = "*"
+version = "0.5.0rc1"
+
+[package.dependencies]
+sphinx = "*"
+
+[package.extras]
+dev = ["transifex-client", "sphinxcontrib-httpdomain", "bump2version"]
+
+[[package]]
+category = "main"
 description = "sphinxcontrib-applehelp is a sphinx extension which outputs Apple help books"
 name = "sphinxcontrib-applehelp"
 optional = false
@@ -1203,7 +1243,7 @@ docs = ["sphinx", "jaraco.packaging (>=3.2)", "rst.linker (>=1.9)"]
 testing = ["jaraco.itertools", "func-timeout"]
 
 [metadata]
-content-hash = "533e351b5119874f0680e5806437592eff1047c4cdd7fe8e97080a9ba66b7f6b"
+content-hash = "99d566d2af0d9e509253390d4a44d02f6100cf28ba5244d2533f9709137e9b03"
 python-versions = "^3.7"
 
 [metadata.files]
@@ -1564,6 +1604,10 @@ numpy = [
     {file = "numpy-1.18.5-cp38-cp38-win_amd64.whl", hash = "sha256:3dd6823d3e04b5f223e3e265b4a1eae15f104f4366edd409e5a5e413a98f911f"},
     {file = "numpy-1.18.5.zip", hash = "sha256:34e96e9dae65c4839bd80012023aadd6ee2ccb73ce7fdf3074c62f301e63120b"},
 ]
+numpydoc = [
+    {file = "numpydoc-1.0.0-py3-none-any.whl", hash = "sha256:99e9c4ec51ff0dc17f7e15afcb26ba77a2f8ccc85a19dede40006a2b93cc903f"},
+    {file = "numpydoc-1.0.0.tar.gz", hash = "sha256:e481c0799dfda208b6a2c2cb28757fa6b6cbc4d6e43722173697996cf556df7f"},
+]
 packaging = [
     {file = "packaging-20.4-py2.py3-none-any.whl", hash = "sha256:998416ba6962ae7fbd6596850b80e17859a5753ba17c32284f67bfff33784181"},
     {file = "packaging-20.4.tar.gz", hash = "sha256:4357f74f47b9c12db93624a82154e9b120fa8293699949152b22065d556079f8"},
@@ -1794,6 +1838,14 @@ soundfile = [
 sphinx = [
     {file = "Sphinx-3.1.1-py3-none-any.whl", hash = "sha256:97c9e3bcce2f61d9f5edf131299ee9d1219630598d9f9a8791459a4d9e815be5"},
     {file = "Sphinx-3.1.1.tar.gz", hash = "sha256:74fbead182a611ce1444f50218a1c5fc70b6cc547f64948f5182fb30a2a20258"},
+]
+sphinx-automodapi = [
+    {file = "sphinx-automodapi-0.12.tar.gz", hash = "sha256:a1338bc0a7f5c9bb317ecf7c7abd489c7cff452098205ef5110f733570516ac0"},
+    {file = "sphinx_automodapi-0.12-py2.py3-none-any.whl", hash = "sha256:83bef65c2862fc377c7758efddd9426a6a299bd6e55156389c00ae7216d8e4f4"},
+]
+sphinx-rtd-theme = [
+    {file = "sphinx_rtd_theme-0.5.0rc1-py2.py3-none-any.whl", hash = "sha256:1ba9bbc8898ed8531ac8d140b4ff286d57010fb878303b2efae3303726ec821b"},
+    {file = "sphinx_rtd_theme-0.5.0rc1.tar.gz", hash = "sha256:a18194ae459f6a59b0d56e4a8b4c576c0125fb9a12f2211e652b4a8133092e14"},
 ]
 sphinxcontrib-applehelp = [
     {file = "sphinxcontrib-applehelp-1.0.2.tar.gz", hash = "sha256:a072735ec80e7675e3f432fcae8610ecf509c5f1869d17e2eecff44389cdbc58"},

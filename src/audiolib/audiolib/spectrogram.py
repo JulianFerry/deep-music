@@ -11,22 +11,39 @@ _audio = import_module(f'{_pkg}.audio')
 
 class Spectrogram(np.ndarray):
     """
-    Wrapper around numpy array, intended to handle audio spectrogram data.
-    Contains attributes specific to audio such as sampling rate and fundamental frequency,
-    as well as spectrogram specific data such as fft size, hop length and resolution,
-    and defines methods to display and process spectrograms and convert them to audio.
+    Handles audio spectrogram data.
+
+    Extends numpy arrays with spectrogram-specific attributes and methods to display,
+    process and convert spectrograms to audio.
+
+    Attributes
+    ----------
+    sampling_rate: int
+        The sampling rate used to convert the audio to digital format
+    nyquist: int
+        The maximum frequency of the audio data (equal to half the sampling rate)
+    fundamental_freq: int
+        The fundamental frequency of the audio (must be passed on object creation)
+    cqt: bool
+        Specifies whether this spectrogram is a standard FFT or a CQT
+    params: dict
+        Parameters used to create the spectrogram:
+
+        * If `cqt` is `False`: The only dict key is the FFT hop_length
+        * If `cqt` is `True`: The keys are n_bins, bins_per_octave, hop_length,
+          fmin, scale, sparsity and res_type
 
     Methods
     -------
-    plot:
+    plot
         Plot the spectrogram as an image
-    plot_fft:
+    plot_fft
         Plot a time bin of the spectrogram as an FFT line plot
-    filter_harmonics:
+    filter_harmonics
         Filter out all non-harmonic frequencies from the spectrogram
-    to_audio:
+    to_audio
         Convert a spectrogram back to an audio waveform
-    convolve_spectrogram: (experimental)
+    convolve_spectrogram
         Apply non-continuous 1-D convolution
 
     """
@@ -35,7 +52,7 @@ class Spectrogram(np.ndarray):
 
     def __new__(
         cls,
-        array: np.array,
+        array: np.ndarray,
         sampling_rate: int,
         fundamental_freq: int = None,
         cqt: bool = False,
@@ -46,18 +63,7 @@ class Spectrogram(np.ndarray):
 
         Parameters
         ----------
-        sampling_rate: int
-            Sampling rate of the original audio data
-        fundamental_freq: int or float
-            Audio fundamental frequency in Hz
-        cqt: bool
-            If the spectrogram is a CQT spectrogram (frequencies are on a log2 scale)
-        params: dict
-            Parameters used to create the spectrogram:
-            - If cqt is False, this is just hop_length
-            - If cqt is True, this is n_bins, bins_per_octave, hop_length, fmin, scale,
-                                      sparsity and res_type (see Audio._get_cqt_params)
-
+        See Spectrogram attributes docstring (also refer to Audio._get_cqt_params)
         """
         obj = np.asarray(array).view(cls)
         obj.sampling_rate = sampling_rate
@@ -69,9 +75,10 @@ class Spectrogram(np.ndarray):
 
     def __array_finalize__(self, obj):
         """
-        Numpy subclassing constructor. This gets called every time a Spectrogram
-        object is created, either by using the Spectrogram() constructor or when
-        a Spectrogram method returns self.
+        Numpy subclassing constructor.
+        
+        This gets called every time a Spectrogram object is created, either by using
+        the Spectrogram() object constructor or when a Spectrogram method returns self.
         See https://numpy.org/devdocs/user/basics.subclassing.html
 
         """
@@ -137,7 +144,7 @@ class Spectrogram(np.ndarray):
         figsize: tuple (width: int, height: int)
             Plot dimensions
         **kwargs:
-            Matplotlib plot kwargs (e.g ax)
+            Matplotlib plot kwargs (e.g. ax)
 
         """
         # Params
@@ -196,8 +203,10 @@ class Spectrogram(np.ndarray):
             Plot maximum frequency. None uses 10x the fundamental if it was set,
             otherwise defaults to the nyquist frequency.
         axis_harm: bool or int
-            For an STFT: Whether to use harmonic frequencies as y axis labels
-            For a CQT: How many harmonic frequencies to use as y axis labels
+            Sets y axis labels as harmonics:
+
+            * For an FFT (bool): Whether to use harmonic frequencies as y axis labels
+            * For a CQT (int): How many harmonic frequencies to use as y axis labels
         time_bin: int
             Which time bin of the spectrogram to plot
         title: str
@@ -205,7 +214,7 @@ class Spectrogram(np.ndarray):
         figsize: tuple (width: int, height: int)
             Plot dimensions
         **kwargs
-            Matplotlib plot kwargs (e.g ax)
+            Matplotlib plot kwargs (e.g. ax)
 
         """
         # Params
@@ -261,7 +270,7 @@ class Spectrogram(np.ndarray):
 
         Returns
         -------
-        spectrogram_harmonic: audiolib.Spectrogram
+        spectrogram_harmonic: audiolib.spectrogram.Spectrogram
             Modified version of the Spectrogram object
 
         """
@@ -292,7 +301,7 @@ class Spectrogram(np.ndarray):
 
         Returns
         -------
-        recovered_audio: audiolib.Audio
+        recovered_audio: audiolib.audio.Audio
 
         """
         # Params

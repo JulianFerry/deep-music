@@ -17,6 +17,21 @@ class AudioDataset:
     """
     Loads audio file names and metadata from an NSynth dataset.
 
+    Attributes
+    ----------
+    path:
+        Path to the root directory of the dataset
+    examples:
+        Metadata supplied with the dataset
+    file_names:
+        Dictionary of file names, with instrument name as the key
+    file_names_nested:
+        Nested version of file_names, with instrument ID as the nested key
+    unique_instruments:
+        List of unique instrument names in the dataset
+    file_counts:
+        Number of files found for each instrument
+
     Methods
     -------
     __init__:
@@ -80,10 +95,12 @@ class AudioDataset:
     ):
         """
         Loads an audio file from the dataset as an AudioFile object.
+
         There are two ways of loading a file:
-            - Either specify file_name to fetch an NSynth file by name
-            - Alternatively, restrict files to those starting with the `instrument` string
-              and use `file_index` to reference the file index within that subset of files
+
+        * Either specify file_name to fetch an NSynth file by name
+        * Alternatively, restrict files to those starting with the `instrument` string
+          and use `file_index` to reference the file index within that subset of files
 
         Parameters
         ----------
@@ -96,7 +113,7 @@ class AudioDataset:
 
         Returns
         -------
-        audiofile - audiolib.AudioFile
+        audiofile: audiolib.nsynth.AudioFile
             AudioFile object with an Audio object as attribute
 
         """
@@ -116,9 +133,19 @@ class AudioDataset:
 class AudioFile:
     """
     Loads audio data and metadata from an NSynth dataset.
-    The main way to interact with the AudioFile is to via its audio attribute,
-    an Audio object which defines methods to analyse audio waveforms.
 
+    The main way to interact with the AudioFile is via its audio attribute, an Audio
+    object which defines methods for audio waveform analysis.
+
+    Attributes
+    ----------
+    path:
+        Path to the audio file
+    info:
+        Metadata supplied by the audio dataset
+    audio:
+        Audio object which defines methods to analyse audio waveforms.
+    
     Methods
     -------
     __init__:
@@ -152,7 +179,8 @@ class AudioFile:
 
     def reload(self):
         """
-        Reload raw audio data from the path specified on object creation.
+        Reload raw audio data from the AudioFile's path.
+
         Automatically called on object creation.
 
         """

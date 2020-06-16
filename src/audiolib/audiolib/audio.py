@@ -15,22 +15,44 @@ _spec = import_module(f'{_pkg}.spectrogram')
 
 class Audio(np.ndarray):
     """
-    Wrapper around numpy array, intended to handle audio waveform data.
-    Contains attributes specific to audio such as sampling rate and fundamental frequency,
-    and defines methods to display and process audio and convert it to spectrograms.
+    Handles audio waveform data.
+    
+    Extends numpy arrays with audio-specific attributes and methods to display,
+    process and convert audio to spectrograms.
 
+    Parameters
+    ----------
+    array: np.ndarray
+        1-D array of audio data to convert to an Audio object
+    sampling_rate: int
+        The sampling rate used to convert the audio to digital format
+    fundamental_freq: int
+        The fundamental frequency of the audio (must be passed on object creation)
+
+    Attributes
+    ----------
+    sampling_rate: int
+        The sampling rate used to convert the audio to digital format
+    nyquist: int
+        The maximum frequency of the audio data (equal to half the sampling rate)
+    duration: float
+        The duration of the audio in seconds
+    fundamental_freq: int
+        The fundamental frequency of the audio (must be passed on object creation)
+    
     Methods
     -------
-    plot:
+    plot
         Plot the audio waveform in the time domain
-    play:
+    play
         Create a widget to play the audio waveform
-    trim:
-        Trim start and end times of the audio waveform
-    filter:
+    trim
+        Trim audio start and end times
+    filter
         Apply a butterworth filter (lp, hp, bp, bs) to the audio
-    to_spectrogram:
+    to_spectrogram
         Generate a spectrogram (STFT or CQT) from the audio
+
 
     """
 
@@ -38,7 +60,7 @@ class Audio(np.ndarray):
 
     def __new__(
         cls,
-        array: np.array,
+        array: np.ndarray,
         sampling_rate: int,
         fundamental_freq: float = None
     ):
@@ -47,12 +69,7 @@ class Audio(np.ndarray):
 
         Parameters
         ----------
-        array: np.array
-            Audio data to convert to Audio object
-        sampling_rate: int
-            Audio sampling rate
-        fundamental_freq: int or float
-             Fundamental frequency of the audio (if known)
+        See Audio class docstring
 
         """
         obj = np.asarray(array).astype(np.float).view(cls)
@@ -64,9 +81,10 @@ class Audio(np.ndarray):
 
     def __array_finalize__(self, obj):
         """
-        Numpy subclassing constructor. This gets called every time an Audio
-        object is created, either by using the Audio() constructor or when
-        an Audio method returns self.
+        Numpy subclassing constructor.
+        
+        This gets called every time an Audio object is created, either by using
+        the Audio() object constructor or when an Audio method returns self.
         See https://numpy.org/devdocs/user/basics.subclassing.html
 
         """
@@ -81,21 +99,6 @@ class Audio(np.ndarray):
 
     # Audio methods
 
-    def play(
-        self,
-        autoplay: bool = False
-    ):
-        """
-        Create widget which plays audio.
-
-        Parameters
-        ----------
-        autoplay: bool
-            Whether to automatically play sound from the widget
-
-        """
-        display.display(display.Audio(self, rate=self.sampling_rate, autoplay=autoplay))
-
     def plot(self):
         """
         Plot the audio waveform
@@ -109,6 +112,21 @@ class Audio(np.ndarray):
         plt.xlabel('Time (s)')
         plt.tight_layout()
         plt.show()
+
+    def play(
+        self,
+        autoplay: bool = False
+    ):
+        """
+        Create a widget which plays audio.
+
+        Parameters
+        ----------
+        autoplay: bool
+            Whether to automatically play sound from the widget
+
+        """
+        display.display(display.Audio(self, rate=self.sampling_rate, autoplay=autoplay))
 
     def trim(
         self,
@@ -127,7 +145,7 @@ class Audio(np.ndarray):
 
         Returns
         -------
-        trimmed_audio: audiolib.Audio
+        trimmed_audio: audiolib.audio.Audio
             Modified version of the Audio object
 
         """
@@ -168,7 +186,7 @@ class Audio(np.ndarray):
 
         Returns
         -------
-        filtered_audio: audiolib.Audio
+        filtered_audio: audiolib.audio.Audio
             Modified version of the Audio object
 
         """
@@ -215,13 +233,17 @@ class Audio(np.ndarray):
         ----------
         time_intervals: int
             Number of time intervals to split the audio signal into
+
         resolution: int or float
-            Frequency resolution
-            - if `cqt=False`: 0 < float <= 1 - proportional to n_fft
-            - if `cqt=True`:  0 < int        - bins per musical note
+            Frequency resolution:
+
+            * If `cqt=False`: 0 < float <= 1 - proportional to n_fft
+            * If `cqt=True`:  0 < int        - bins per musical note
         mode: ('fast', 'max')
-            'fast' sacrifices some resolution for speed (30% faster)
-            'max' maximises the frequency resolution (`cqt=False` only)
+            FFT mode:
+
+            * 'fast' sacrifices some resolution for speed (30% faster)
+            * 'max' maximises the frequency resolution (`cqt=False` only)
         fmin: int or float
             minimum frequency for the transform (`cqt=True` only)
         fmax: int or float
@@ -229,8 +251,8 @@ class Audio(np.ndarray):
 
         Returns
         -------
-        spectrogram: audiolib.Spectrogram
-            Spectrogram with the parameters used to generate it as attributes
+        spectrogram: audiolib.audio.Spectrogram
+            Spectrogram which keeps the Audio object's attributes
 
         """
         # CQT
@@ -309,8 +331,10 @@ class Audio(np.ndarray):
         resolution: float
             0 < r <= 1  (1 maximises frequency resolution)
         mode: ('max', 'fast')
-            'max' uses the number of audio samples as n_fft
-            'fast' uses the largest power of 2 smaller than the number of samples
+            FFT mode:
+            
+            * 'max' uses the number of audio samples as n_fft
+            * 'fast' uses the largest power of 2 smaller than the number of samples
 
         """
         if resolution > 1:
