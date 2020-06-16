@@ -16,6 +16,21 @@ class Spectrogram(np.ndarray):
     Extends numpy arrays with spectrogram-specific attributes and methods to display,
     process and convert spectrograms to audio.
 
+    Parameters
+    ----------
+    array: np.ndarray
+        1-D array of audio data to convert to an `Audio` object
+    sampling_rate: int
+        The sampling rate used to convert the audio to digital format
+    fundamental_freq: int
+        The fundamental frequency of the audio (must be passed on object creation)
+    params: dict
+        Parameters used to create the spectrogram:
+
+        * If `cqt` is `False`: The only dict key is the FFT `hop_length`
+        * If `cqt` is `True`: The keys are `n_bins`, `bins_per_octave`, `hop_length`,
+          `fmin`, `scale`, `sparsity` and `res_type`
+
     Attributes
     ----------
     sampling_rate: int
@@ -35,6 +50,8 @@ class Spectrogram(np.ndarray):
 
     Methods
     -------
+    __init__
+        Create `Spectrogram` object from a numpy array
     plot
         Plot the spectrogram as an image
     plot_fft
@@ -59,11 +76,12 @@ class Spectrogram(np.ndarray):
         params: dict = None
     ):
         """
-        Cast a numpy array to a Spectrogram object and set the __dict__ attributes.
+        Cast a numpy array to a `Spectrogram` object and set the __dict__ attributes.
 
         Parameters
         ----------
-        See Spectrogram attributes docstring (also refer to Audio._get_cqt_params)
+        See Spectrogram class docstring (also refer to Audio._get_cqt_params)
+
         """
         obj = np.asarray(array).view(cls)
         obj.sampling_rate = sampling_rate
@@ -77,8 +95,8 @@ class Spectrogram(np.ndarray):
         """
         Numpy subclassing constructor.
         
-        This gets called every time a Spectrogram object is created, either by using
-        the Spectrogram() object constructor or when a Spectrogram method returns self.
+        This gets called every time a `Spectrogram` object is created, either by using
+        the `Spectrogram()` object constructor or when a Spectrogram method returns self.
         See https://numpy.org/devdocs/user/basics.subclassing.html
 
         """
@@ -95,7 +113,7 @@ class Spectrogram(np.ndarray):
 
     def __reduce__(self):
         """
-        When pickling the Spectrogram object with `pickle.dump`, this method adds
+        When pickling the `Spectrogram` object with `pickle.dump`, this method adds
         the custom __dict__ attributes to the pickled numpy array.
 
         """
@@ -106,7 +124,7 @@ class Spectrogram(np.ndarray):
 
     def __setstate__(self, state):
         """
-        When unpickling the Spectrogram object with `pickle.load`, this methods loads
+        When unpickling the `Spectrogram` object with `pickle.load`, this methods loads
         the custom __dict__ attributes from the pickled numpy array.
 
         """
@@ -193,7 +211,7 @@ class Spectrogram(np.ndarray):
         **kwargs
     ):
         """
-        Plot a fft as a matplotlib line plot
+        Plot a FFT as a matplotlib line plot
 
         Parameters
         ----------
@@ -271,7 +289,7 @@ class Spectrogram(np.ndarray):
         Returns
         -------
         spectrogram_harmonic: audiolib.spectrogram.Spectrogram
-            Modified version of the Spectrogram object
+            Modified version of the `Spectrogram` object
 
         """
         if self.fundamental_freq is None:
@@ -297,7 +315,7 @@ class Spectrogram(np.ndarray):
 
     def to_audio(self):
         """
-        Convert spectrogram to an Audio object
+        Convert spectrogram to an `Audio` object
 
         Returns
         -------

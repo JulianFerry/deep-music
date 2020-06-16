@@ -17,27 +17,32 @@ class AudioDataset:
     """
     Loads audio file names and metadata from an NSynth dataset.
 
+    Parameters
+    ----------
+    path: str or pathlib.Path
+        Path to the NSynth dataset folder
+
     Attributes
     ----------
-    path:
+    path
         Path to the root directory of the dataset
-    examples:
+    examples
         Metadata supplied with the dataset
-    file_names:
+    file_names
         Dictionary of file names, with instrument name as the key
-    file_names_nested:
+    file_names_nested
         Nested version of file_names, with instrument ID as the nested key
-    unique_instruments:
+    unique_instruments
         List of unique instrument names in the dataset
-    file_counts:
+    file_counts
         Number of files found for each instrument
 
     Methods
     -------
-    __init__:
-        Load dataset file names and metadata
-    load_file:
-        Load audio file from the dataset as an AudioFile object
+    __init__
+        Load dataset file names and metadata from a root directory
+    load_file
+        Load audio file from the dataset as an `AudioFile` object
 
     """
 
@@ -50,8 +55,7 @@ class AudioDataset:
 
         Parameters
         ----------
-        path: str or pathlib.Path
-            Path to the NSynth dataset folder
+        See AudioDataset class docstring
 
         """
         self.path = path if type(path) is Path else Path(path)
@@ -94,11 +98,11 @@ class AudioDataset:
         file_index: int = None
     ):
         """
-        Loads an audio file from the dataset as an AudioFile object.
+        Loads an audio file from the dataset as an `AudioFile` object.
 
         There are two ways of loading a file:
 
-        * Either specify file_name to fetch an NSynth file by name
+        * Either specify `file_name` to fetch an NSynth file by name
         * Alternatively, restrict files to those starting with the `instrument` string
           and use `file_index` to reference the file index within that subset of files
 
@@ -114,7 +118,6 @@ class AudioDataset:
         Returns
         -------
         audiofile: audiolib.nsynth.AudioFile
-            AudioFile object with an Audio object as attribute
 
         """
         if file_name is not None:
@@ -132,25 +135,32 @@ class AudioDataset:
 
 class AudioFile:
     """
-    Loads audio data and metadata from an NSynth dataset.
+    Loads audio data from a .wav file.
 
-    The main way to interact with the AudioFile is via its audio attribute, an Audio
+    The main way to interact with the AudioFile is via its audio attribute: an `Audio`
     object which defines methods for audio waveform analysis.
+
+    Parameters
+    ----------
+    path: str
+        Path to the audio .wav file
+    info: dict
+        NSynth metadata (from examples.json)
 
     Attributes
     ----------
-    path:
+    path
         Path to the audio file
-    info:
+    info
         Metadata supplied by the audio dataset
-    audio:
-        Audio object which defines methods to analyse audio waveforms.
+    audio
+        `Audio` object which defines methods to analyse audio waveforms.
     
     Methods
     -------
-    __init__:
-        Stores audio data from a .wav file as an audio object
-    reload:
+    __init__
+        Loads audio data from a .wav file as an `Audio` object
+    reload
         Reload Audio raw data (removes any previously applied processing)
 
     """
@@ -161,14 +171,11 @@ class AudioFile:
         info: dict
     ):
         """
-        Load audio data from .wav file
+        Load audio data from a .wav file.
 
         Parameters
         ----------
-        path: str
-            Path to the audio .wav file
-        info: dict
-            NSynth metadata (from examples.json)
+        See AudioFile class docstring
 
         """
         self.path = path

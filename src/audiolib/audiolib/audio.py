@@ -23,7 +23,7 @@ class Audio(np.ndarray):
     Parameters
     ----------
     array: np.ndarray
-        1-D array of audio data to convert to an Audio object
+        1-D array of audio data to convert to an `Audio` object
     sampling_rate: int
         The sampling rate used to convert the audio to digital format
     fundamental_freq: int
@@ -42,6 +42,8 @@ class Audio(np.ndarray):
     
     Methods
     -------
+    __init__
+        Create `Audio` object from a numpy array
     plot
         Plot the audio waveform in the time domain
     play
@@ -65,7 +67,7 @@ class Audio(np.ndarray):
         fundamental_freq: float = None
     ):
         """
-        Cast a numpy array to an Audio object and set the __dict__ attributes.
+        Cast a numpy array to an `Audio` object and set the __dict__ attributes.
 
         Parameters
         ----------
@@ -83,8 +85,8 @@ class Audio(np.ndarray):
         """
         Numpy subclassing constructor.
         
-        This gets called every time an Audio object is created, either by using
-        the Audio() object constructor or when an Audio method returns self.
+        This gets called every time an `Audio` object is created, either by using
+        the `Audio()` object constructor or when an Audio method returns self.
         See https://numpy.org/devdocs/user/basics.subclassing.html
 
         """
@@ -101,7 +103,7 @@ class Audio(np.ndarray):
 
     def plot(self):
         """
-        Plot the audio waveform
+        Plot the audio waveform.
 
         """
         time = np.linspace(0., self.duration, self.shape[0])
@@ -146,7 +148,7 @@ class Audio(np.ndarray):
         Returns
         -------
         trimmed_audio: audiolib.audio.Audio
-            Modified version of the Audio object
+            Modified version of the `Audio` object
 
         """
         if 0 < start < self.duration:
@@ -187,7 +189,7 @@ class Audio(np.ndarray):
         Returns
         -------
         filtered_audio: audiolib.audio.Audio
-            Modified version of the Audio object
+            Modified version of the `Audio` object
 
         """
         # Filter parameters
@@ -252,7 +254,7 @@ class Audio(np.ndarray):
         Returns
         -------
         spectrogram: audiolib.audio.Spectrogram
-            Spectrogram which keeps the Audio object's attributes
+            Spectrogram which keeps the `Audio` object's attributes
 
         """
         # CQT
