@@ -70,10 +70,8 @@ html_context = {
   'display_github': True,
   'github_user': 'JulianFerry',
   'github_repo': 'deep-music',
-  'github_version': 'master/src/audiolib/'
+  'github_version': 'master/src/audiolib/docs/source/'
 }
-
-github_url = 'https://github.com/JulianFerry/deep-music/tree/master/src/audiolib/docs'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
