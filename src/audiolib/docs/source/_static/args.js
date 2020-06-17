@@ -48,7 +48,7 @@ function parenAlignSignatureArgs(signature_div){
     temp_name = 'temp ' + signature_subdiv.id.replace(/\./g, '_')
     
     // Add line breaks for all arguments and calculate the maximum arg width
-    args = Array.from(signature_div.getElementsByClassName('sig-param'))
+    args = Array.from(signature_subdiv.getElementsByClassName('sig-param'))
     args.forEach(function(arg) { addBreak(arg, temp_name) })
     args_max_width = Math.max(...args.map(arg => arg.offsetWidth))
     removeElementsByClassName(temp_name)
@@ -70,13 +70,13 @@ function parenAlignSignatureArgs(signature_div){
             }
         })
     } else {
-        leftAlignSignatureParens(signature_div)
+        leftAlignSignatureArgs(signature_div)
     }
 }
 
 function resetSignatureArgs(signature_div){
     /*
-    Reset the margin of each function argument to 0
+    Reset the margin of each function signature argument to 0
     */
     signature_subdiv = signature_div.getElementsByTagName('dt')[0]
     temp_name = 'temp ' + signature_subdiv.id.replace(/\./g, '_')
@@ -91,7 +91,7 @@ function resetSignatureArgs(signature_div){
 function alignSignatureArgs(){
     class_signatures = Array.from(document.getElementsByClassName('py class'))
     class_signatures.forEach(resetSignatureArgs)
-    class_signatures.forEach(leftAlignSignatureArgs)
+    class_signatures.forEach(parenAlignSignatureArgs)
     
     method_signatures = Array.from(document.getElementsByClassName('py method'))
     method_signatures.forEach(resetSignatureArgs)

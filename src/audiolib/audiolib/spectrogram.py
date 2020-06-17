@@ -11,7 +11,7 @@ _audio = import_module(f'{_pkg}.audio')
 
 class Spectrogram(np.ndarray):
     """
-    Extends numpy arrays to handle audio spectrogram data.
+    Extension to numpy arrays which handles audio spectrogram data.
 
     Defines spectrogram-specific attributes and methods to display, process and
     convert spectrograms to audio.

@@ -73,7 +73,7 @@ html_context = {
   'github_version': 'master/src/audiolib/'
 }
 
-github_url = 'https://github.com/JulianFerry/deep-music/tree/master/src/audiolib/audiolib'
+github_url = 'https://github.com/JulianFerry/deep-music/tree/master/src/audiolib/docs'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
