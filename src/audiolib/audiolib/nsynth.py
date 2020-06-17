@@ -40,7 +40,6 @@ class AudioDataset:
     Methods
     -------
     __init__
-        Load dataset file names and metadata from a root directory
     load_file
         Load audio file from the dataset as an `AudioFile` object
 
@@ -51,7 +50,7 @@ class AudioDataset:
         path: str = '../data/raw/nsynth-train/'
     ):
         """
-        Load the file names and metadata in the specified NSynth directory.
+        Load the file names and metadata from a root directory.
 
         Parameters
         ----------
@@ -137,8 +136,8 @@ class AudioFile:
     """
     Loads audio data from a .wav file.
 
-    The main way to interact with the AudioFile is via its audio attribute: an `Audio`
-    object which defines methods for audio waveform analysis.
+    The main way to interact with the AudioFile is via its `audio` attribute: an
+    `audiolib.audio.Audio` object which defines methods for audio waveform analysis.
 
     Parameters
     ----------
@@ -159,7 +158,6 @@ class AudioFile:
     Methods
     -------
     __init__
-        Loads audio data from a .wav file as an `Audio` object
     reload
         Reload Audio raw data (removes any previously applied processing)
 

@@ -11,10 +11,10 @@ _audio = import_module(f'{_pkg}.audio')
 
 class Spectrogram(np.ndarray):
     """
-    Handles audio spectrogram data.
+    Extends numpy arrays to handle audio spectrogram data.
 
-    Extends numpy arrays with spectrogram-specific attributes and methods to display,
-    process and convert spectrograms to audio.
+    Defines spectrogram-specific attributes and methods to display, process and
+    convert spectrograms to audio.
 
     Parameters
     ----------
@@ -23,7 +23,9 @@ class Spectrogram(np.ndarray):
     sampling_rate: int
         The sampling rate used to convert the audio to digital format
     fundamental_freq: int
-        The fundamental frequency of the audio (must be passed on object creation)
+        The fundamental frequency of the audio (if it exists)
+    cqt: bool
+        Specifies whether this spectrogram is a standard FFT or a CQT
     params: dict
         Parameters used to create the spectrogram:
 
@@ -38,20 +40,15 @@ class Spectrogram(np.ndarray):
     nyquist: int
         The maximum frequency of the audio data (equal to half the sampling rate)
     fundamental_freq: int
-        The fundamental frequency of the audio (must be passed on object creation)
+        The fundamental frequency of the audio (if it exists)
     cqt: bool
         Specifies whether this spectrogram is a standard FFT or a CQT
     params: dict
-        Parameters used to create the spectrogram:
-
-        * If `cqt` is `False`: The only dict key is the FFT hop_length
-        * If `cqt` is `True`: The keys are n_bins, bins_per_octave, hop_length,
-          fmin, scale, sparsity and res_type
+        Parameters used to create the spectrogram
 
     Methods
     -------
-    __init__
-        Create `Spectrogram` object from a numpy array
+    __new__
     plot
         Plot the spectrogram as an image
     plot_fft
@@ -76,7 +73,7 @@ class Spectrogram(np.ndarray):
         params: dict = None
     ):
         """
-        Cast a numpy array to a `Spectrogram` object and set the __dict__ attributes.
+        Cast a numpy array to a `Spectrogram` object and set its attributes.
 
         Parameters
         ----------

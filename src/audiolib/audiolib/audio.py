@@ -15,10 +15,10 @@ _spec = import_module(f'{_pkg}.spectrogram')
 
 class Audio(np.ndarray):
     """
-    Handles audio waveform data.
+    Extends numpy arrays to handle audio waveform data.
     
-    Extends numpy arrays with audio-specific attributes and methods to display,
-    process and convert audio to spectrograms.
+    Defines audio-specific attributes and methods to display, process and convert
+    audio to spectrograms.
 
     Parameters
     ----------
@@ -42,8 +42,7 @@ class Audio(np.ndarray):
     
     Methods
     -------
-    __init__
-        Create `Audio` object from a numpy array
+    __new__
     plot
         Plot the audio waveform in the time domain
     play
@@ -67,7 +66,7 @@ class Audio(np.ndarray):
         fundamental_freq: float = None
     ):
         """
-        Cast a numpy array to an `Audio` object and set the __dict__ attributes.
+        Cast a numpy array to an `Audio` object and set its attributes.
 
         Parameters
         ----------
@@ -136,7 +135,7 @@ class Audio(np.ndarray):
         end: float = -1
     ):
         """
-        Trim the audio start and end times (in seconds).
+        Trim the audio start and end times.
 
         Parameters
         ----------

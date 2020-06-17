@@ -61,6 +61,11 @@ exclude_patterns = []
 #
 html_theme = 'sphinx_rtd_theme'
 
+html_theme_options = {
+    'nosidebar': True,
+    'body_max_width': None
+}
+
 html_context = {
   'display_github': True,
   'github_user': 'JulianFerry',
@@ -75,4 +80,5 @@ github_url = 'https://github.com/JulianFerry/deep-music/tree/master/src/audiolib
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
-#html_css_files = ['columns.css']
+html_css_files = ['custom.css']
+html_js_files = ['args.js']
