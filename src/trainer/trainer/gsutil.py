@@ -7,8 +7,8 @@ def gcloud_auth():
     """
     Authenticate with local GCP credentials if they have been mounted
     """
-    if os.path.isdir('/root/credentials'):
-        key_path = '/root/credentials/gs-access-key.json'
+    if os.path.isdir('./credentials'):
+        key_path = './credentials/gs-access-key.json'
         os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = key_path
         subprocess.run(['gcloud', 'auth', 'activate-service-account', '--key-file', key_path])
     global AUTHENTICATED

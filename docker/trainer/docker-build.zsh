@@ -22,8 +22,8 @@ if head -1 src/$package_name/requirements.txt | grep -q Warning; then
 else
     sed -i "1 s/.*/$pypiserver_url/" src/$package_name/requirements.txt
 fi
-sed -i "/torch==1.4.0/d" src/$package_name/requirements.txt
-sed -i "/torchvision==0.5.0/d" src/$package_name/requirements.txt
+sed -i "/torch/d" src/$package_name/requirements.txt
+sed -i "/torchvision/d" src/$package_name/requirements.txt
 
 # Stop and remove project container if it exists. Remove image if it exists
 echo "Removing container $container_name and image $image_name"

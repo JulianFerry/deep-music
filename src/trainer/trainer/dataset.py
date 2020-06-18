@@ -62,8 +62,9 @@ class SpectrogramDataset(Dataset):
         Returns
         -------
         sample: (spectrogram, label)
-            If spec_transform does not modify type, spectrogram is an audiolib.Spectrogram
-            If label_transform does not modify type, label is an int
+
+            * spectrogram: audiolib.Spectrogram (unless `spec_transform` modifies type)
+            * label: int (unless `label_transform` modifies type)
 
         """
         # Load pickled Spectrogram object
@@ -129,6 +130,12 @@ def stratified_split(dataset, split=0.8, seed=42):
     return train_sampler, test_sampler
 
 
+def dataset_norm(dataset, save_path=None):
+    # Calculate mean and std
+    specs = np.hstack([dataset[i][0] for i in range(len(dataset))])
+    mean = specs.mean()
+    std = specs.std()
+
 def load_data(data_dir, instruments):
     """
     Create PyTorch data loader from data in data_dir
@@ -137,7 +144,7 @@ def load_data(data_dir, instruments):
     # Copy data from cloud storage bucket
     if data_dir.startswith('gs://'):
         gs_path = data_dir
-        data_dir = '/root/data'
+        data_dir = './data'
         for instrument in instruments:
             gsutil.download(os.path.join(gs_path, instrument), data_dir)
     # Load dataset

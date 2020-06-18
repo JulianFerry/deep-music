@@ -24,7 +24,7 @@ done
 # Run with cloud storage credentials as a volume
 docker run --rm \
   --cap-add SYS_ADMIN --device /dev/fuse --security-opt apparmor:unconfined \
-  --volume $project_path/credentials/:/root/credentials/:ro \
+  --volume $project_path/credentials/:/opt/credentials/:ro \
   --name $container_name \
   $IMAGE_URI \
     --data_dir gs://$BUCKET_NAME/data/processed/time_intervals=1/resolution=5/ \

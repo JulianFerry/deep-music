@@ -123,7 +123,7 @@ class MusicNet(nn.Module):
 
         """
         if path.startswith('gs://'):
-            path_tmp = Path('/root/train-output')
+            path_tmp = Path('./train-output')
         else:
             path_tmp = path
         os.makedirs(path_tmp, exist_ok=True)

@@ -25,7 +25,7 @@ docker run --rm \
   --volume $project_path/data/:/root/data/ \
   --name $container_name \
   $image_name \
-    --data_dir /root/data/processed/time_intervals=1/resolution=5/ \
-    --job_dir /root/train-output/ \
+    --data_dir /opt/data/processed/time_intervals=1/resolution=5/ \
+    --job_dir /opt/train-output/ \
     --instruments "[keyboard_acoustic, guitar_acoustic]" \
     --epochs 1
