@@ -10,9 +10,9 @@ url = "http://localhost:8080"
 
 [tool.poetry.dependencies]
 python = "^3.7"
-numba = "0.48.0"
 audiolib = "^0.1.0"
-torchvision = "^0.6.0"
+torch = "^1.5.0"
+torchvision = "0.6.0"
 tensorboardx = "^2.0"
 google-cloud-storage = "^1.29.0"
 
