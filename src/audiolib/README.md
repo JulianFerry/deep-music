@@ -2,9 +2,16 @@
 
 ## Introduction
 
-Audiolib is a wrapper around `numpy` and `librosa` aimed at speeding up the analysis of audio data by offering an API to create audio data pipelines.
+Audiolib is a wrapper around `numpy` and `librosa` created to speed up the analysis of audio data using numpy data pipelines.
 
 The audiolib API defines two main classes: `Audio` and `Spectrogram`. These are extended versions of numpy arrays, with the addition of processing and visualisation methods, as well as methods to convert between the two classes.
+
+## Installation
+
+### From source:
+Requirements: [poetry]
+
+`poetry install --no-dev`
 
 ## Demo:
 

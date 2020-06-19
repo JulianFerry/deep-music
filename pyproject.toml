@@ -1,21 +1,14 @@
 [tool.poetry]
 name = "deep-music"
 version = "0.1.0"
-description = ""
+description = "Instrument recognition algorithm"
 authors = ["Julian Ferry <julianferry94@gmail.com>"]
 
 
 [tool.poetry.dependencies]
 python = "^3.7"
-pandas = "^1.0.1"
 jupyter = { version = "^1.0.0",  optional = true }
 audiolib = { path = "./src/audiolib" }
-torch = "^1.4.0"
-torchaudio = "^0.4.0"
-torchvision = "^0.5.0"
-numpy = "^1.18.5"
-tensorboard = "^2.2.2"
-google-cloud-storage = "^1.29.0"
 trainer = { path = "./src/trainer" }
 
 [tool.poetry.extras]

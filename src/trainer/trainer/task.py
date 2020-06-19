@@ -3,6 +3,11 @@ from pathlib import Path
 from . import trainer
 
 
+def list_loads(s):
+    l = s.strip('[]').replace(' ', '').split(',')
+    return l
+
+
 def get_args():
     """
     Argument parser
@@ -30,7 +35,7 @@ def get_args():
     parser.add_argument(
         '--instruments',
         help='Instruments to classify in the model',
-        type=str,
+        type=list_loads,
         default='[*]'
     )
 
@@ -47,7 +52,6 @@ def get_args():
     # Parse
     args = parser.parse_args()
     args = args.__dict__
-    args['instruments'] = args['instruments'].strip('[]').replace(' ', '').split(',')
 
     return args
 
