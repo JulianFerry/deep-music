@@ -1,0 +1,18 @@
+[
+    {
+        "id": 0,
+        "fft_params": {
+            "start": 0.2,
+            "end": 3
+        },
+        "excluded_qualities": ["fast_decay"]
+    },
+    {
+        "id": 1,
+        "fft_params": {
+            "start": 0.2,
+            "end": 3
+        },
+        "excluded_qualities": []
+    }
+]

@@ -1,3 +1,5 @@
+import audiolib
+
 def audio_to_spectrogram(
     audio: audiolib.audio.Audio,
     fft_params: dict
