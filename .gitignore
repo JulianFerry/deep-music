@@ -5,7 +5,7 @@
 # Exclude subfolders from the ignore rules
 # Now we can whitelist .gitkeep in those subfolders
 data/**
-#!data/**/
+#!data/**/  # comment this once the data directory structure has been committed
 !data/**/.gitkeep
 
 # Logs and pickled objects
