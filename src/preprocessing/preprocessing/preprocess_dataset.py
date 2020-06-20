@@ -2,6 +2,7 @@ import os
 import numpy as np
 import pandas as pd
 import pickle
+import json
 import time
 import matplotlib.pyplot as plt
 from pathlib import Path
@@ -36,8 +37,7 @@ def save_spectrograms(
     dataset_root: str,
     instr_name: str,
     instr_ids: list,
-    fft_params: dict = None,
-    excluded_qualities: list = None,
+    config: dict = None,
     save_path: str = '../data/processed/spectrograms'
 ):
     """
@@ -49,40 +49,37 @@ def save_spectrograms(
         Path to the dataset of audio .wav files
     instr_name: str
         Name of the instrument (should match file prefixes)
-    fft_params: dict
-        FFT parameter options:
+    instr_ids: list
+        IDs of the instruments to apply preprocessing to (should match file prefixes)
+    config: dict
+        Preprocessing options:
 
         - `start`: int - Start time for the audio, in seconds (default: 0)
         - `end`: int - End time for the audio, in seconds (default: -1)
-        - `time_intervals`: int - Number of audio splits (default: 1)
+        - `time_intervals`: int - Number of audio splits for the FFT (default: 1)
         - `resolution`: int - Frequency resolution, in bins per note (default: 5)
-    excluded_qualities: list
-        Audio qualities to exclude, as strings (should match metadata `qualities_str`)
+        - `exclude`: list - Qualities to exclude (see metadata `qualities_str`)
     save_path: str
         Where to save the spectrograms (root directory)
     """
-    # Parse FFT parameters
-    if excluded_qualities == None:
-        excluded_qualities = []
-    if fft_params is None:
-        fft_params = {}
-    default_params = {
+    # Paths
+    dataset_root = Path(dataset_root)
+    save_path = Path(save_path)
+    root_save_path = save_path / dataset_root.name / instr_name
+    # Parse FFT parameters and save to config.json
+    if config is None:
+        config = {}
+    default_config = {
         'time_intervals': 1,
         'resolution': 5,
         'start': 0,
-        'end': -1
+        'end': -1,
+        'exclude': []
     }
-    for k, v in default_params.items():
-        fft_params[k] = fft_params.get(k, v)
-    # Paths
-    dataset_root = Path(dataset_root)
-    root_save_path = Path(os.path.join(
-        save_path,
-        dataset_root.name,
-        f'time_intervals={fft_params["time_intervals"]}',
-        f'resolution={fft_params["resolution"]}',
-        instr_name
-    ))
+    for k, v in default_config.items():
+        config[k] = config.get(k, v)
+    with open(save_path / 'config.json', 'w') as f:
+        json.dump(config, f)
     # Iterables
     dataset = AudioDataset(dataset_root)
     num_files = sum(
@@ -92,7 +89,7 @@ def save_spectrograms(
     fail_count = 0
 
     # Loop
-    print('Generating {} {} spectrograms:'.format(num_files, instr_name))
+    print('\nGenerating {} {} spectrograms:'.format(num_files, instr_name))
     for instr_id in instr_ids:
         instr_id_save_path = root_save_path/instr_id
         os.makedirs(instr_id_save_path, exist_ok=True)
@@ -100,16 +97,17 @@ def save_spectrograms(
             file_save_path = instr_id_save_path/(file_name+'.spec')
             print('- File {} - {} successes / {} failures'.format(
                      file_name, success_count, fail_count),
-                  end ='\r')
+                  end ='')
             try:
                 af = dataset.load_file(file_name)
-                if not set(af.info['qualities_str']).intersection(exluded_qualities):
-                    spec = audio_to_spectrogram(af.audio, fft_params)
+                if not set(af.info['qualities_str']).intersection(config['exclude']):
+                    spec = audio_to_spectrogram(af.audio, config)
                     with open(file_save_path, 'wb') as f:
                         pickle.dump(spec, f)
                     success_count += 1
             except Exception as exc:
-                #print(exc)
+                print(' - Last error:', exc, end='')
                 fail_count += 1
+            print('', end='\r')
                 
-    print('\nFinished. Saved spectrograms to {}\n'.format(root_save_path))
+    print('\nFinished. Saved spectrograms to {}'.format(root_save_path))

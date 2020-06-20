@@ -40,16 +40,10 @@ def get_args():
 
     # Preprocessing arguments
     parser.add_argument(
-        '--fft_params',
-        help='FFT parameter options',
+        '--config',
+        help='Preprocessing options',
         type=json.loads,
         default='{}'
-    )
-    parser.add_argument(
-        '--excluded_qualities',
-        help='Audio qualities to exclude, as strings',
-        type=list_loads,
-        default='[]'
     )
 
     # Parse
@@ -69,7 +63,6 @@ if __name__ == '__main__':
             args['dataset_path'],
             instr,
             instr_id_list,
-            args['fft_params'],
-            args['excluded_qualities'],
+            args['config'],
             args['save_path']
         )

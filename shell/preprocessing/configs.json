@@ -1,0 +1,18 @@
+[
+    {
+        "id": 0,
+        "config": {
+            "start": 0.2,
+            "end": 3,
+            "exclude": ["fast_decay"]
+        }
+    },
+    {
+        "id": 1,
+        "config": {
+            "start": 0.2,
+            "end": 3,
+            "exclude": []
+        }
+    }
+]
