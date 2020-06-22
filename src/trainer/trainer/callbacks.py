@@ -4,8 +4,14 @@ import os
 import json
 from . import gsutil
 
-class Callback:
 
+class Callback:
+    """
+    Base callback class.
+
+    Each callback method is called at the appropriate time during training.
+
+    """
     def __init__(self):
         pass
     def on_train_start(self):
@@ -23,7 +29,10 @@ class Callback:
 
 
 class PrintCallback(Callback):
+    """
+    Callback which prints training progress and performance during training.
 
+    """
     def __init__(self, num_epochs, num_batches, verbosity=2):
         self.num_epochs = num_epochs
         self.num_batches = num_batches
@@ -68,21 +77,22 @@ class PrintCallback(Callback):
 
 
 class SummaryWriterCallback(tbx.SummaryWriter, Callback):
+    """
+    Callback which saves training summary logs: config, hparams and performance.
 
+    Parameters
+    ----------
+    path: str
+        The path used to save the logs
+    data_config: dict
+        The data configuration used for the training job
+    update_freq: str
+        How often to write logs. Format "N epoch(s)" or "N batche(s)"
+    hparmas: dict
+        Hyperparameters used for the training job
+
+    """
     def __init__(self, path, data_config, update_freq='epoch', hparams=None):
-        """
-        Parameters
-        ----------
-        path: str
-            The path used to save the logs
-        data_config: dict
-            The data configuration used for the training job
-        update_freq: str
-            How often to write logs. Format "N epoch(s)" or "N batche(s)"
-        hparmas: dict
-            Hyperparameters used for the training job
-
-        """
         # Parse params
         self.path = path
         self.log_stage = self._parse_stage(update_freq)
@@ -103,7 +113,7 @@ class SummaryWriterCallback(tbx.SummaryWriter, Callback):
         with open(config_path, 'w') as f:
             json.dump(self.data_config, f)
         if self.path.startswith('gs://'):
-            gsutil.upload(config_path, self.path)
+            gsutil.upload(config_path, os.path.join(self.path, 'data_config.json'))
         # Save hparams
     #     if self.hparams is not None:
     #         self.add_hparams(hparam_dict=self.hparams,
@@ -127,7 +137,7 @@ class SummaryWriterCallback(tbx.SummaryWriter, Callback):
 
     def _parse_stage(self, update_freq):
         """
-        Parse log update stage (epochs or batches)
+        Parse logging "stage" (epochs or batches)
         """
         log_stage = None
         stage_error = ValueError(
@@ -154,7 +164,7 @@ class SummaryWriterCallback(tbx.SummaryWriter, Callback):
 
     def _parse_freq(self, update_freq):
         """
-        Parse log update integer frequency
+        Parse logging frequency
         """
         log_freq = None
         numeric_error = ValueError(

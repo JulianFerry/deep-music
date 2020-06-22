@@ -28,13 +28,13 @@ do
 done
 
 # Mock config parsing
-echo "Using training config:"
-config='{
+echo "Using training data config:"
+data_config='{
   "data_id": 0,
   "instruments": ["brass_electronic", "string_electronic"]
 }'
-echo $config
-data_id=$(echo $config | jq ".data_id?")
+echo $data_config
+data_id=$(echo $data_config | jq ".data_id?")
 echo "Applied to data preprocessed with config $data_id"
 echo
 
@@ -50,5 +50,5 @@ docker run --rm \
   $IMAGE_URI \
     --data_dir gs://$BUCKET_NAME/$data_path \
     --job_dir gs://$BUCKET_NAME/$output_path \
-    --config $config \
+    --data_config $data_config \
     --epochs 10
