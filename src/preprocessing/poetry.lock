@@ -67,6 +67,14 @@ version = "0.2.0"
 
 [[package]]
 category = "main"
+description = "Python package for providing Mozilla's CA Bundle."
+name = "certifi"
+optional = false
+python-versions = "*"
+version = "2020.6.20"
+
+[[package]]
+category = "main"
 description = "Foreign Function Interface for Python calling C code."
 name = "cffi"
 optional = false
@@ -75,6 +83,14 @@ version = "1.14.0"
 
 [package.dependencies]
 pycparser = "*"
+
+[[package]]
+category = "main"
+description = "Universal encoding detector for Python 2 and 3"
+name = "chardet"
+optional = false
+python-versions = "*"
+version = "3.0.4"
 
 [[package]]
 category = "main"
@@ -128,6 +144,34 @@ mccabe = ">=0.6.0,<0.7.0"
 pycodestyle = ">=2.6.0a1,<2.7.0"
 pyflakes = ">=2.2.0,<2.3.0"
 
+[package.dependencies.importlib-metadata]
+python = "<3.8"
+version = "*"
+
+[[package]]
+category = "main"
+description = "Internationalized Domain Names in Applications (IDNA)"
+name = "idna"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+version = "2.9"
+
+[[package]]
+category = "dev"
+description = "Read metadata from Python packages"
+marker = "python_version < \"3.8\""
+name = "importlib-metadata"
+optional = false
+python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
+version = "1.6.1"
+
+[package.dependencies]
+zipp = ">=0.5"
+
+[package.extras]
+docs = ["sphinx", "rst.linker"]
+testing = ["packaging", "pep517", "importlib-resources (>=1.3)"]
+
 [[package]]
 category = "main"
 description = "IPython: Productive Interactive Computing"
@@ -174,14 +218,14 @@ description = "An autocompletion tool for Python that can be used for text edito
 name = "jedi"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
-version = "0.17.0"
+version = "0.17.1"
 
 [package.dependencies]
-parso = ">=0.7.0"
+parso = ">=0.7.0,<0.8.0"
 
 [package.extras]
 qa = ["flake8 (3.7.9)"]
-testing = ["colorama", "docopt", "pytest (>=3.9.0,<5.0.0)"]
+testing = ["Django (<3.1)", "colorama", "docopt", "pytest (>=3.9.0,<5.0.0)"]
 
 [[package]]
 category = "main"
@@ -351,6 +395,11 @@ optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 version = "0.13.1"
 
+[package.dependencies]
+[package.dependencies.importlib-metadata]
+python = "<3.8"
+version = ">=0.12"
+
 [package.extras]
 dev = ["pre-commit", "tox"]
 
@@ -440,6 +489,10 @@ pluggy = ">=0.12,<1.0"
 py = ">=1.5.0"
 wcwidth = "*"
 
+[package.dependencies.importlib-metadata]
+python = "<3.8"
+version = ">=0.12"
+
 [package.extras]
 checkqa-mypy = ["mypy (v0.761)"]
 testing = ["argcomplete", "hypothesis (>=3.56)", "mock", "nose", "requests", "xmlschema"]
@@ -477,6 +530,24 @@ name = "pytz"
 optional = false
 python-versions = "*"
 version = "2020.1"
+
+[[package]]
+category = "main"
+description = "Python HTTP for Humans."
+name = "requests"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
+version = "2.24.0"
+
+[package.dependencies]
+certifi = ">=2017.4.17"
+chardet = ">=3.0.2,<4"
+idna = ">=2.5,<3"
+urllib3 = ">=1.21.1,<1.25.0 || >1.25.0,<1.25.1 || >1.25.1,<1.26"
+
+[package.extras]
+security = ["pyOpenSSL (>=0.14)", "cryptography (>=1.3.4)"]
+socks = ["PySocks (>=1.5.6,<1.5.7 || >1.5.7)", "win-inet-pton"]
 
 [[package]]
 category = "main"
@@ -572,15 +643,41 @@ test = ["pytest", "mock"]
 
 [[package]]
 category = "main"
+description = "HTTP library with thread-safe connection pooling, file post, and more."
+name = "urllib3"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, <4"
+version = "1.25.9"
+
+[package.extras]
+brotli = ["brotlipy (>=0.6.0)"]
+secure = ["certifi", "cryptography (>=1.3.4)", "idna (>=2.0.0)", "pyOpenSSL (>=0.14)", "ipaddress"]
+socks = ["PySocks (>=1.5.6,<1.5.7 || >1.5.7,<2.0)"]
+
+[[package]]
+category = "main"
 description = "Measures the displayed width of unicode strings in a terminal"
 name = "wcwidth"
 optional = false
 python-versions = "*"
 version = "0.2.4"
 
+[[package]]
+category = "dev"
+description = "Backport of pathlib-compatible object wrapper for zip files"
+marker = "python_version < \"3.8\""
+name = "zipp"
+optional = false
+python-versions = ">=3.6"
+version = "3.1.0"
+
+[package.extras]
+docs = ["sphinx", "jaraco.packaging (>=3.2)", "rst.linker (>=1.9)"]
+testing = ["jaraco.itertools", "func-timeout"]
+
 [metadata]
-content-hash = "42afbb32196ac043c7cc87c9cce46958ad8d208487ec55325fa6f221ea950565"
-python-versions = "^3.8"
+content-hash = "47ebffb1709811ec06b43abd1026627caf3c1207cc17c7fc54f919803c5e2920"
+python-versions = "^3.7"
 
 [metadata.files]
 appnope = [
@@ -605,6 +702,10 @@ audioread = [
 backcall = [
     {file = "backcall-0.2.0-py2.py3-none-any.whl", hash = "sha256:fbbce6a29f263178a1f7915c1940bde0ec2b2a967566fe1c65c1dfb7422bd255"},
     {file = "backcall-0.2.0.tar.gz", hash = "sha256:5cbdbf27be5e7cfadb448baf0aa95508f91f2bbc6c6437cd9cd06e2a4c215e1e"},
+]
+certifi = [
+    {file = "certifi-2020.6.20-py2.py3-none-any.whl", hash = "sha256:8fc0819f1f30ba15bdb34cceffb9ef04d99f420f68eb75d901e9560b8749fc41"},
+    {file = "certifi-2020.6.20.tar.gz", hash = "sha256:5930595817496dd21bb8dc35dad090f1c2cd0adfaf21204bf6732ca5d8ee34d3"},
 ]
 cffi = [
     {file = "cffi-1.14.0-cp27-cp27m-macosx_10_9_x86_64.whl", hash = "sha256:1cae98a7054b5c9391eb3249b86e0e99ab1e02bb0cc0575da191aedadbdf4384"},
@@ -635,6 +736,10 @@ cffi = [
     {file = "cffi-1.14.0-cp38-cp38-win32.whl", hash = "sha256:675686925a9fb403edba0114db74e741d8181683dcf216be697d208857e04ca8"},
     {file = "cffi-1.14.0-cp38-cp38-win_amd64.whl", hash = "sha256:00789914be39dffba161cfc5be31b55775de5ba2235fe49aa28c148236c4e06b"},
     {file = "cffi-1.14.0.tar.gz", hash = "sha256:2d384f4a127a15ba701207f7639d94106693b6cd64173d6c8988e2c25f3ac2b6"},
+]
+chardet = [
+    {file = "chardet-3.0.4-py2.py3-none-any.whl", hash = "sha256:fc323ffcaeaed0e0a02bf4d117757b98aed530d9ed4531e3e15460124c106691"},
+    {file = "chardet-3.0.4.tar.gz", hash = "sha256:84ab92ed1c4d4f16916e05906b6b75a6c0fb5db821cc65e70cbd64a3e2a5eaae"},
 ]
 colorama = [
     {file = "colorama-0.4.3-py2.py3-none-any.whl", hash = "sha256:7d73d2a99753107a36ac6b455ee49046802e59d9d076ef8e47b61499fa29afff"},
@@ -685,6 +790,14 @@ flake8 = [
     {file = "flake8-3.8.3-py2.py3-none-any.whl", hash = "sha256:15e351d19611c887e482fb960eae4d44845013cc142d42896e9862f775d8cf5c"},
     {file = "flake8-3.8.3.tar.gz", hash = "sha256:f04b9fcbac03b0a3e58c0ab3a0ecc462e023a9faf046d57794184028123aa208"},
 ]
+idna = [
+    {file = "idna-2.9-py2.py3-none-any.whl", hash = "sha256:a068a21ceac8a4d63dbfd964670474107f541babbd2250d61922f029858365fa"},
+    {file = "idna-2.9.tar.gz", hash = "sha256:7588d1c14ae4c77d74036e8c22ff447b26d0fde8f007354fd48a7814db15b7cb"},
+]
+importlib-metadata = [
+    {file = "importlib_metadata-1.6.1-py2.py3-none-any.whl", hash = "sha256:15ec6c0fd909e893e3a08b3a7c76ecb149122fb14b7efe1199ddd4c7c57ea958"},
+    {file = "importlib_metadata-1.6.1.tar.gz", hash = "sha256:0505dd08068cfec00f53a74a0ad927676d7757da81b7436a6eefe4c7cf75c545"},
+]
 ipython = [
     {file = "ipython-7.15.0-py3-none-any.whl", hash = "sha256:1b85d65632211bf5d3e6f1406f3393c8c429a47d7b947b9a87812aa5bce6595c"},
     {file = "ipython-7.15.0.tar.gz", hash = "sha256:0ef1433879816a960cd3ae1ae1dc82c64732ca75cec8dab5a4e29783fb571d0e"},
@@ -694,8 +807,8 @@ ipython-genutils = [
     {file = "ipython_genutils-0.2.0.tar.gz", hash = "sha256:eb2e116e75ecef9d4d228fdc66af54269afa26ab4463042e33785b887c628ba8"},
 ]
 jedi = [
-    {file = "jedi-0.17.0-py2.py3-none-any.whl", hash = "sha256:cd60c93b71944d628ccac47df9a60fec53150de53d42dc10a7fc4b5ba6aae798"},
-    {file = "jedi-0.17.0.tar.gz", hash = "sha256:df40c97641cb943661d2db4c33c2e1ff75d491189423249e989bcea4464f3030"},
+    {file = "jedi-0.17.1-py2.py3-none-any.whl", hash = "sha256:1ddb0ec78059e8e27ec9eb5098360b4ea0a3dd840bedf21415ea820c21b40a22"},
+    {file = "jedi-0.17.1.tar.gz", hash = "sha256:807d5d4f96711a2bcfdd5dfa3b1ae6d09aa53832b182090b222b5efb81f52f63"},
 ]
 joblib = [
     {file = "joblib-0.15.1-py3-none-any.whl", hash = "sha256:6825784ffda353cc8a1be573118085789e5b5d29401856b35b756645ab5aecb5"},
@@ -904,6 +1017,10 @@ pytz = [
     {file = "pytz-2020.1-py2.py3-none-any.whl", hash = "sha256:a494d53b6d39c3c6e44c3bec237336e14305e4f29bbf800b599253057fbb79ed"},
     {file = "pytz-2020.1.tar.gz", hash = "sha256:c35965d010ce31b23eeb663ed3cc8c906275d6be1a34393a1d73a41febf4a048"},
 ]
+requests = [
+    {file = "requests-2.24.0-py2.py3-none-any.whl", hash = "sha256:fe75cc94a9443b9246fc7049224f75604b113c36acb93f87b80ed42c44cbb898"},
+    {file = "requests-2.24.0.tar.gz", hash = "sha256:b3559a131db72c33ee969480840fff4bb6dd111de7dd27c8ee1f820f4f00231b"},
+]
 resampy = [
     {file = "resampy-0.2.2.tar.gz", hash = "sha256:62af020d8a6674d8117f62320ce9470437bb1d738a5d06cd55591b69b463929e"},
 ]
@@ -967,7 +1084,15 @@ traitlets = [
     {file = "traitlets-4.3.3-py2.py3-none-any.whl", hash = "sha256:70b4c6a1d9019d7b4f6846832288f86998aa3b9207c6821f3578a6a6a467fe44"},
     {file = "traitlets-4.3.3.tar.gz", hash = "sha256:d023ee369ddd2763310e4c3eae1ff649689440d4ae59d7485eb4cfbbe3e359f7"},
 ]
+urllib3 = [
+    {file = "urllib3-1.25.9-py2.py3-none-any.whl", hash = "sha256:88206b0eb87e6d677d424843ac5209e3fb9d0190d0ee169599165ec25e9d9115"},
+    {file = "urllib3-1.25.9.tar.gz", hash = "sha256:3018294ebefce6572a474f0604c2021e33b3fd8006ecd11d62107a5d2a963527"},
+]
 wcwidth = [
     {file = "wcwidth-0.2.4-py2.py3-none-any.whl", hash = "sha256:79375666b9954d4a1a10739315816324c3e73110af9d0e102d906fdb0aec009f"},
     {file = "wcwidth-0.2.4.tar.gz", hash = "sha256:8c6b5b6ee1360b842645f336d9e5d68c55817c26d3050f46b235ef2bc650e48f"},
+]
+zipp = [
+    {file = "zipp-3.1.0-py3-none-any.whl", hash = "sha256:aa36550ff0c0b7ef7fa639055d797116ee891440eac1a56f378e2d3179e0320b"},
+    {file = "zipp-3.1.0.tar.gz", hash = "sha256:c599e4d75c98f6798c509911d08a22e6c021d074469042177c8c86fb92eefd96"},
 ]

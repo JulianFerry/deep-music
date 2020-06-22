@@ -9,9 +9,10 @@ name = "pypiserver"
 url = "http://localhost:8080"
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.7"
 numba = "0.48.0"
 audiolib = "^0.1.0"
+requests = "^2.24.0"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^3.7.9"

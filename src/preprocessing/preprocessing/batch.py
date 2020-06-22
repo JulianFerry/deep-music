@@ -64,8 +64,8 @@ def save_spectrograms(
     """
     # Paths
     dataset_root = Path(dataset_root)
-    save_path = Path(save_path)
-    root_save_path = save_path / dataset_root.name / instr_name
+    root_save_path = Path(save_path)
+    instr_save_path = root_save_path / dataset_root.name / instr_name
     # Parse FFT parameters and save to config.json
     if config is None:
         config = {}
@@ -78,7 +78,8 @@ def save_spectrograms(
     }
     for k, v in default_config.items():
         config[k] = config.get(k, v)
-    with open(save_path / 'config.json', 'w') as f:
+    os.makedirs(root_save_path, exist_ok=True)
+    with open(root_save_path / 'config.json', 'w') as f:
         json.dump(config, f)
     # Iterables
     dataset = AudioDataset(dataset_root)
@@ -91,8 +92,8 @@ def save_spectrograms(
     # Loop
     print('\nGenerating {} {} spectrograms:'.format(num_files, instr_name))
     for instr_id in instr_ids:
-        instr_id_save_path = root_save_path/instr_id
-        os.makedirs(instr_id_save_path, exist_ok=True)
+        instr_id_save_path = instr_save_path/instr_id
+        os.makedirs(instr_id_save_path)
         for file_name in dataset.file_names_nested[instr_name][instr_id]:
             file_save_path = instr_id_save_path/(file_name+'.spec')
             print('- File {} - {} successes / {} failures'.format(
@@ -110,4 +111,4 @@ def save_spectrograms(
                 fail_count += 1
             print('', end='\r')
                 
-    print('\nFinished. Saved spectrograms to {}'.format(root_save_path))
+    print('\nFinished. Saved spectrograms to {}'.format(instr_save_path))
