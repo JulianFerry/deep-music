@@ -1,6 +1,7 @@
 import tensorboardX as tbx
 import re
 import os
+import json
 from . import gsutil
 
 class Callback:
@@ -68,17 +69,42 @@ class PrintCallback(Callback):
 
 class SummaryWriterCallback(tbx.SummaryWriter, Callback):
 
-    def __init__(self, path, update_freq='epoch', hparams=None):
+    def __init__(self, path, data_config, update_freq='epoch', hparams=None):
         """
+        Parameters
+        ----------
+        path: str
+            The path used to save the logs
+        data_config: dict
+            The data configuration used for the training job
+        update_freq: str
+            How often to write logs. Format "N epoch(s)" or "N batche(s)"
+        hparmas: dict
+            Hyperparameters used for the training job
+
         """
+        # Parse params
+        self.path = path
         self.log_stage = self._parse_stage(update_freq)
         self.log_freq = self._parse_freq(update_freq)
+        self.data_config = data_config
         self.hparams = hparams
+        # Initialise summary writer
         if path.startswith('gs://'):
             gsutil.gcloud_auth()
-        super().__init__(path)
+        log_path = os.path.join(path, 'logs')
+        super().__init__(log_path)
 
-    # def on_train_start(self):
+    def on_train_start(self):
+        # Save data config
+        local_path = self.path.replace('gs://', '')
+        os.makedirs(local_path, exist_ok=True)
+        config_path = os.path.join(local_path, 'data_config.json')
+        with open(config_path, 'w') as f:
+            json.dump(self.data_config, f)
+        if self.path.startswith('gs://'):
+            gsutil.upload(config_path, self.path)
+        # Save hparams
     #     if self.hparams is not None:
     #         self.add_hparams(hparam_dict=self.hparams,
     #                              metric_dict={'val_accuracy': logs['epoch_acc/val']},

@@ -24,12 +24,14 @@ def train_and_evaluate(args):
     # Callbacks
     hparams = {'lr': args['lr']}
     tb_writer = SummaryWriterCallback(
-        path=os.path.join(args['job_dir'], 'logs'),
+        path=args['job_dir'],
+        data_config=args['data_config'],
         hparams=hparams
     )
     callbacks = [tb_writer]
     # Data
-    train_loader, test_loader = load_data(args['data_dir'], args['instruments'])
+    instruments =  args['data_config']['instruments']
+    train_loader, test_loader = load_data(args['data_dir'], instruments)
     # Train
     model.fit(
         train_loader,

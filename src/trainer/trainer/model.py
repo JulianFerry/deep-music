@@ -45,6 +45,7 @@ class MusicNet(nn.Module):
         callbacks=[]
     ):
         """
+        Run training job. Callbacks are called at each stage of training.
 
         """
         callbacks.append(PrintCallback(epochs, len(train_loader), verbosity))
@@ -93,6 +94,7 @@ class MusicNet(nn.Module):
 
     def evaluate(self, outputs, labels):
         """
+        Calculate the model's accuracy on the given data
 
         """
         ps = torch.exp(outputs)
@@ -102,6 +104,7 @@ class MusicNet(nn.Module):
 
     def validate(self, test_loader):
         """
+        Calculate loss and accuracy on the validation data
 
         """
         loss = 0
@@ -120,14 +123,12 @@ class MusicNet(nn.Module):
 
     def save(self, path):
         """
+        Save the model
 
         """
+        local_path = Path(path.replace('gs://', ''))
+        os.makedirs(local_path, exist_ok=True)
+        torch.save(self.state_dict(), os.path.join(local_path, 'model.pt'))
         if path.startswith('gs://'):
-            path_tmp = Path('./train-output')
-        else:
-            path_tmp = path
-        os.makedirs(path_tmp, exist_ok=True)
-        torch.save(self.state_dict(), os.path.join(path_tmp, 'model.pt'))
-        if path.startswith('gs://'):
-            gsutil.upload(os.path.join(path_tmp, '*'), path)
+            gsutil.upload(os.path.join(local_path, '*'), path)
         print('Saved model to:', path)

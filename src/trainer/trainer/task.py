@@ -1,11 +1,13 @@
 import argparse
+import json
 from pathlib import Path
 from . import trainer
 
 
-def list_loads(s):
-    l = s.strip('[]').replace(' ', '').split(',')
-    return l
+def json_loads(s):
+    """Handle json sent by gcloud ai platform submit command"""
+    s = s.replace('\n', '').replace('$', '')
+    return json.loads(s)
 
 
 def get_args():
@@ -33,10 +35,10 @@ def get_args():
         default=1
     )
     parser.add_argument(
-        '--instruments',
-        help='Instruments to classify in the model',
-        type=list_loads,
-        default='[*]'
+        '--data_config',
+        help='Data config: preprocessing config + subset of instruments to classify',
+        type=json_loads,
+        default='{}'
     )
 
     # Paths
@@ -57,7 +59,5 @@ def get_args():
 
 
 if __name__ == '__main__':
-    # Parse command-line arguments
     args = get_args()
-    # Run the training job
     trainer.train_and_evaluate(args)
