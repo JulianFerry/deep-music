@@ -1,8 +1,8 @@
 #!/bin/zsh
 script_dir=$(dirname $0:A);
-package_name=$(basename $script_dir);
-project_path=$(dirname $(dirname $script_dir));
-package_path=$project_path/src/$package_name
+package_path=$(dirname $script_dir)
+package_name=$(basename $package_path);
+project_path=$(dirname $(dirname $package_path));
 export PYTHONPATH=$package_path
 
 # Parse JSON config
