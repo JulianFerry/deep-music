@@ -10,10 +10,9 @@ container_name=$project_name-$package_name;
 PROJECT_ID=$(gcloud config list project --format "value(core.project)")
 IMAGE_REPO_NAME=$container_name
 IMAGE_TAG=latest
-export REGION=europe-west1
-export BUCKET_NAME=deep-musik-data
-export IMAGE_URI=eu.gcr.io/$PROJECT_ID/$IMAGE_REPO_NAME:$IMAGE_TAG
-export JOB_NAME=${package_name}_$(date +%Y%m%d_%H%M%S);
+REGION=europe-west1
+BUCKET_NAME=deep-musik-data
+IMAGE_URI=eu.gcr.io/$PROJECT_ID/$IMAGE_REPO_NAME:$IMAGE_TAG
 
 
 # Parse JSON config file
@@ -52,17 +51,19 @@ do
 done
 
 # Parse config
-echo "Using training config id $config_id:"
-config=$(echo $config_list | jq ".[$config_id].config?")
-echo $config
-data_id=$(echo $config_list | jq ".[$config_id].config[data_id]?")
+echo "Using training data config id $config_id:"
+data_config=$(echo $config_list | jq ".[$config_id].config?")
+echo $data_config
+data_id=$(echo $config_list | jq ".[$config_id].config.data_id?")
 echo "Applied to data preprocessed with config $data_id"
 echo
 
 
 # Data paths
 data_path=data/processed/spectrograms/config-$data_id/nsynth-train
-output_path=output/${JOB_NAME}
+JOB_DIR=${package_name}/config${config_id}/$(date +%y%m%d_%H%M%S);
+output_path=output/${JOB_DIR}
+JOB_NAME=${JOB_DIR//\//_};  # replace / with _ for job name
 
 # Submit training job to gcloud AI platform
 gcloud ai-platform jobs submit training $JOB_NAME \
@@ -71,5 +72,5 @@ gcloud ai-platform jobs submit training $JOB_NAME \
   -- \
     --data_dir=gs://$BUCKET_NAME/$data_path \
     --job_dir=gs://$BUCKET_NAME/$output_path \
-    --config $config \
+    --data_config $data_config \
     --epochs=100

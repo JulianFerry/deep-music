@@ -5,5 +5,12 @@
             "data_id": 0,
             "instruments": ["keyboard_acoustic", "guitar_acoustic"]
         }
+    },
+    {
+        "id": 1,
+        "config": {
+            "data_id": 1,
+            "instruments": ["keyboard_acoustic", "guitar_acoustic"]
+        }
     }
 ]

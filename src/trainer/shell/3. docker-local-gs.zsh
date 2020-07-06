@@ -51,4 +51,4 @@ docker run --rm \
     --data_dir gs://$BUCKET_NAME/$data_path \
     --job_dir gs://$BUCKET_NAME/$output_path \
     --data_config $data_config \
-    --epochs 10
+    --epochs 100

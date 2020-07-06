@@ -1,6 +1,7 @@
 import numpy as np
 import pickle
 import os
+import json
 from pathlib import Path
 
 import torch
@@ -19,22 +20,23 @@ def listdir(path):
 
 
 class SpectrogramDataset(Dataset):
-    """CQT spectrograms dataset"""
+    """
+    CQT spectrograms dataset
+    
+    Parameters
+    ----------
+    root: string
+        Directory which contains all the pickled spectrograms 
+    instruments: list
+        List of instrument files to keep for training
+    spec_transform: PyTorch transform object
+        Transforms applied to the training data (spectrograms)
+    label_transform: PyTorch transform object
+        Transforms applied to the training labels (instrument names)
+
+    """
 
     def __init__(self, root, instruments, spec_transform=None, label_transform=None):
-        """
-        Parameters
-        ----------
-        root: string
-            Directory which contains all the spectrogram arrays
-        instruments: list
-            List of instruments to keep
-        spec_transform: PyTorch transform object
-            Transform applied to the training data (spectrograms)
-        label_transform: PyTorch transform object
-            Transform applied to the training labels (instrument names)
-
-        """
         root = Path(root)
         nested_files = [[root/instr/instr_id/instr_file
                          for instr_id in listdir(root/instr)
@@ -130,15 +132,38 @@ def stratified_split(dataset, split=0.8, seed=42):
     return train_sampler, test_sampler
 
 
-def dataset_norm(dataset, save_path=None):
-    # Calculate mean and std
+def norm_params(data_dir, instruments, save_path=None):
+    """
+    Calculate the normalisation parameters of the dataset
+
+    """
+    dataset = SpectrogramDataset(data_dir, instruments)
     specs = np.hstack([dataset[i][0] for i in range(len(dataset))])
     mean = specs.mean()
     std = specs.std()
+    if save_path is not None:
+        local_path = save_path.replace('gs://', '')
+        os.makedirs(local_path, exist_ok=True)
+        norm_path = os.path.join(local_path, 'norm_params.json')
+        with open(norm_path, 'w') as f:
+            json.dump({'mean': mean, 'std': std}, f)
+        if save_path.startswith('gs://'):
+            gsutil.upload(norm_path, os.path.join(save_path, 'norm_params.json'))
+    return mean, std
 
-def load_data(data_dir, instruments):
+
+def load_data(data_dir, instruments, save_path):
     """
-    Create PyTorch data loader from data in data_dir
+    Create PyTorch data loader from data
+
+    Parameters
+    ----------
+    data_dir: str
+        Root directory where the processed data is stored
+    instruments: list
+        List of instruments to load spectrograms for
+    norm_path:
+        Path to save the calculated normalisation parameters for the data
 
     """
     # Copy data from cloud storage bucket
@@ -147,12 +172,8 @@ def load_data(data_dir, instruments):
         data_dir = './data'
         for instrument in instruments:
             gsutil.download(os.path.join(gs_path, instrument), data_dir)
-    # Load dataset
-    spec_dataset = SpectrogramDataset(data_dir, instruments)
-    # Calculate mean and std
-    specs = np.hstack([spec_dataset[i][0] for i in range(len(spec_dataset))])
-    mean = specs.mean()
-    std = specs.std()
+    # Calculate normalisation factors
+    mean, std = norm_params(data_dir, instruments, save_path)
     # Prepare dataset for training
     spec_transform = transforms.Compose([
         ToTensor(float32=True),

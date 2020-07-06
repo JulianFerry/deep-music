@@ -31,7 +31,11 @@ def train_and_evaluate(args):
     callbacks = [tb_writer]
     # Data
     instruments =  args['data_config']['instruments']
-    train_loader, test_loader = load_data(args['data_dir'], instruments)
+    train_loader, test_loader = load_data(
+        args['data_dir'],
+        instruments,
+        args['job_dir']
+    )
     # Train
     model.fit(
         train_loader,

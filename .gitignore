@@ -8,8 +8,8 @@ data/**
 #!data/**/  # comment this once the data directory structure has been committed
 !data/**/.gitkeep
 
-# Logs and pickled objects
-train-output/
+# Preprocessing and training outputs
+output/
 
 # GCP credentials
 credentials/
