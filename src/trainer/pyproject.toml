@@ -6,7 +6,7 @@ authors = ["julianferry <julianferry94@gmail.com>"]
 
 [[tool.poetry.source]]
 name = "pypiserver"
-url = "http://http://35.240.45.166/"
+url = "http://35.240.45.166/"
 
 [tool.poetry.dependencies]
 python = "^3.7"
