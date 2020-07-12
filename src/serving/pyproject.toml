@@ -1,0 +1,32 @@
+[tool.poetry]
+name = "serving"
+version = "0.1.0"
+description = "Flask model-serving API"
+authors = ["JulianFerry <julianferry94@gmail.com>"]
+
+
+[[tool.poetry.source]]
+name = "pypiserver"
+url = "http://35.240.45.166/"
+
+
+[tool.poetry.dependencies]
+python = "^3.7"
+audiolib = "^0.1.0"
+preprocessing = { path = "../preprocessing" }
+trainer = { path = "../trainer" }
+flask = "^1.1.2"
+google-cloud-storage = "^1.29.0"
+flask_restful = "^0.3.8"
+torch = "1.5.0"
+
+
+[tool.poetry.dev-dependencies]
+flake8 = "^3.7.9"
+pytest = "^5.3.5"
+pytest-cov = "^2.8.1"
+
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
