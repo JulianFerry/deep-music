@@ -1,12 +1,12 @@
 [tool.poetry]
-name = "trainer"
+name = "deep-music-trainer"
 version = "0.1.0"
 description = "Training package for deep-music model"
 authors = ["julianferry <julianferry94@gmail.com>"]
 
 [[tool.poetry.source]]
 name = "pypiserver"
-url = "http://localhost:8080"
+url = "http://http://35.240.45.166/"
 
 [tool.poetry.dependencies]
 python = "^3.7"

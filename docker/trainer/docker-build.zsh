@@ -15,12 +15,9 @@ image_name=eu.gcr.io/$PROJECT_ID/$IMAGE_REPO_NAME:$IMAGE_TAG
 echo "Generating requirements.txt for $package_name"
 ( cd $project_path/src/$package_name && \
   poetry export --without-hashes -f requirements.txt > requirements.txt );
-pypiserver_url="--extra-index-url http:\/\/pypiserver:8080"
 if head -1 src/$package_name/requirements.txt | grep -q Warning; then
     >&2 head -1 src/$package_name/requirements.txt;
     return 1
-else
-    sed -i "1 s/.*/$pypiserver_url/" src/$package_name/requirements.txt
 fi
 sed -i "/torch/d" src/$package_name/requirements.txt
 sed -i "/torchvision/d" src/$package_name/requirements.txt

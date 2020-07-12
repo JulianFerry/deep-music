@@ -1,12 +1,12 @@
 [tool.poetry]
-name = "preprocessing"
+name = "deep-music-preprocessing"
 version = "0.1.0"
 description = "Audio preprocessing for deep-music project"
 authors = ["JulianFerry <julianferry94@gmail.com>"]
 
 [[tool.poetry.source]]
 name = "pypiserver"
-url = "http://localhost:8080"
+url = "http://35.240.45.166/"
 
 [tool.poetry.dependencies]
 python = "^3.7"
