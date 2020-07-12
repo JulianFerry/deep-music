@@ -11,13 +11,13 @@ RUN wget -qO- $gcloud_sdk | tar -xz && \
 ENV PATH "/opt/google-cloud-sdk/bin:$PATH"
 
 # Install python packages
-COPY src/trainer/requirements.txt /opt/requirements.txt
+COPY src/trainer /opt/trainer
+WORKDIR /opt/trainer
 RUN pip install -U pip && \
     pip install --quiet -Iv future==0.18.2 && \
-    pip install -r /opt/requirements.txt --trusted-host pypiserver --no-deps --ignore-installed
+    pip install -r requirements.txt --trusted-host 35.240.45.166 --no-deps --ignore-installed
 
-# Copy training package, add to path and create directory to mount data to
-COPY src/trainer/trainer /opt/trainer
+# Add opt to python path and create directory to download data 
 ENV PYTHONPATH "${PYTHONPATH}:/opt/"
 RUN mkdir /opt/data
 
