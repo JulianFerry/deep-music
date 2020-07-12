@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "deep-music-trainer"
+name = "trainer"
 version = "0.1.0"
 description = "Training package for deep-music model"
 authors = ["julianferry <julianferry94@gmail.com>"]

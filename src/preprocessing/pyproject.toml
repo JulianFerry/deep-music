@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "deep-music-preprocessing"
+name = "preprocessing"
 version = "0.1.0"
 description = "Audio preprocessing for deep-music project"
 authors = ["JulianFerry <julianferry94@gmail.com>"]
