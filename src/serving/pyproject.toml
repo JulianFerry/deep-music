@@ -16,8 +16,9 @@ audiolib = "^0.1.0"
 preprocessing = { path = "../preprocessing" }
 trainer = { path = "../trainer" }
 flask = "^1.1.2"
-google-cloud-storage = "^1.29.0"
 flask_restful = "^0.3.8"
+gunicorn = "^20.0.4"
+google-cloud-storage = "^1.29.0"
 torch = "1.5.0"
 
 

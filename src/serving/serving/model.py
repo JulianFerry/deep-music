@@ -14,8 +14,6 @@ class Model:
 
     def __init__(self):
         # gcloud settings - this should become pre-set environment variables or JSON files
-        key_path = '../../credentials/gs-access-key.json'
-        os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = key_path
         BUCKET = 'deep-musik-data'
         client = storage.Client()
         self.bucket = client.bucket(BUCKET)
