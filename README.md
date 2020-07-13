@@ -6,14 +6,16 @@ Music recognition and generation using deep learning.
 
 ## Project structure / design:
 
-The project currently has three components:
+The project currently has three components, which exist as [standalone packages](https://github.com/JulianFerry/deep-music/tree/master/src):
 1. **Preprocessing** - convert [NSynth](https://magenta.tensorflow.org/datasets/nsynth) audio .wav files to spectrograms with [audiolib](https://github.com/JulianFerry/audiolib).
 2. **Training** - train a Convolutional Neural Network to classify instrument spectrograms with `PyTorch`.
 3. **Serving** - serve the classifier as a RESTful API with `flask` and `gunicorn`.
 
-Each component exists as a standalone package. Each package:
+Each component exists as a standalone package.
 
-- Is callable from the command-line and has configurable arguments. E.g.
+Each package:
+
+- Is callable from the command-line and has configurable arguments. For example, preprocessing is called with:
 ```
 python -m preprocessing.task
    --data_dir path/to/import/raw/data \
@@ -27,7 +29,7 @@ python -m preprocessing.task
    - Gets parsed as `$config` in the above preprocessing example.
    - Gets exported by the `training` stage, so that the data used for training can be reproduced.
 
-- Contains shell scripts to test the package locally, with docker and to deploy the docker image to google cloud.
+- Contains shell scripts to run the package locally, with docker, and to deploy the docker image to cloud.
   [Example: training scripts](https://github.com/JulianFerry/deep-music/tree/master/src/trainer/shell)
 
 
