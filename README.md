@@ -13,7 +13,7 @@ The project currently has three components, which exist as [standalone packages]
 
 Each package:
 
-- Is callable from the command-line and has configurable arguments. For example, preprocessing is called with:
+- Is callable from the command-line and has configurable parameters. For example, preprocessing is called with:
 ```
 python -m preprocessing.task
    --data_dir path/to/import/raw/data \
@@ -27,13 +27,13 @@ python -m preprocessing.task
    - Gets parsed as `$config` in the above preprocessing example.
    - Gets exported by the `training` stage, so that the data used for training can be reproduced.
 
-- Contains shell scripts to run the package locally, with docker, and to deploy the docker image to cloud.
-  [Example: training scripts](https://github.com/JulianFerry/deep-music/tree/master/src/trainer/shell)
+- Contains shell scripts to run the package locally, with docker, and to deploy the docker image to cloud with a specific configuration ID.
+  [Example training scripts](https://github.com/JulianFerry/deep-music/tree/master/src/trainer/shell)
 
 
 ## Roadmap
 
-1. Instrument recognition:
+1. Instrument recognition (current):
    - Instrument classification from single note audio
    - Instrument detection from multiple note audio (songs)
 
