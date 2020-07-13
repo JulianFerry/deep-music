@@ -11,8 +11,6 @@ The project currently has three components, which exist as [standalone packages]
 2. **Training** - train a Convolutional Neural Network to classify instrument spectrograms with `PyTorch`.
 3. **Serving** - serve the classifier as a RESTful API with `flask` and `gunicorn`.
 
-Each component exists as a standalone package.
-
 Each package:
 
 - Is callable from the command-line and has configurable arguments. For example, preprocessing is called with:
