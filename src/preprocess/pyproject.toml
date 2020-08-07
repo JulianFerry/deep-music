@@ -1,18 +1,19 @@
 [tool.poetry]
-name = "preprocessing"
+name = "preprocess"
 version = "0.1.0"
 description = "Audio preprocessing for deep-music project"
 authors = ["JulianFerry <julianferry94@gmail.com>"]
 
 [[tool.poetry.source]]
 name = "pypiserver"
-url = "http://35.240.45.166/"
+url = "http://localhost:8080"
 
 [tool.poetry.dependencies]
 python = "^3.7"
 numba = "0.48.0"
 audiolib = "^0.1.0"
 requests = "^2.24.0"
+apache_beam = {extras = ["gcp"], version = "^2.23.0"}
 
 [tool.poetry.dev-dependencies]
 flake8 = "^3.7.9"
