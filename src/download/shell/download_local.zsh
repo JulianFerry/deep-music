@@ -3,7 +3,7 @@ script_dir=$(dirname $0:A);
 package_path=$(dirname $script_dir);
 project_path=$(dirname $(dirname $package_path));
 
-dataset=$1
+dataset=$1  # User must pass argument 'train', 'valid' or 'test' when running this script
 data_url="http://download.magenta.tensorflow.org/datasets/nsynth/nsynth-$dataset.jsonwav.tar.gz"
 tar_file="nsynth-$dataset.tar.gz"
 
