@@ -4,11 +4,11 @@ package_path=$(dirname $script_dir)
 package_name=$(basename $package_path);
 project_path=$(dirname $(dirname $package_path));
 project_name=$(basename $project_path);
-container_name=$project_name-$package_name;
+service_name=$project_name-$package_name;
 
 # GCP AI platform container naming
 PROJECT_ID=$(gcloud config list project --format "value(core.project)")
-IMAGE_REPO_NAME=$container_name
+IMAGE_REPO_NAME=$service_name
 IMAGE_TAG=latest
 REGION=europe-west1
 BUCKET_NAME=deep-musik-data
