@@ -26,13 +26,9 @@ while [[ $# -gt 0 ]]; do
         ( docker push $image_name ) || return 1
         shift
         ;;
-    -d|--deploy)
-        # Deploy image container to a compute engine VM
-        ( gcloud compute instances create-with-container $package_name \
-          --boot-disk-size 60G \
-          --container-stdin \
-          --container-tty \
-          --container-image $image_name ) || return 1
+    train|valid|test)
+        # Add train/valid/test to datasets
+        datasets+=($1)
         shift
         ;;
     *)
@@ -41,5 +37,14 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+# Deploy image container to a compute engine VM
+( gcloud compute instances create $package_name \
+    --image-family=cos-stable \
+    --image-project=cos-cloud  \
+    --boot-disk-size 60G \
+    --scopes "compute-rw,logging-write,storage-rw" \
+    --metadata "image_name=$image_name,container_args=$datasets" \
+    --metadata-from-file "startup-script=$script_dir/startup-script.sh" )
+
+
 gcloud compute ssh $package_name    # This may fail because the instance creation is not done yet
-# docker attach klt-decompress-xkin

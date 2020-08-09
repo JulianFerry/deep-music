@@ -11,15 +11,6 @@ IMAGE_REPO_NAME=$container_name
 IMAGE_TAG=latest
 image_name=eu.gcr.io/$PROJECT_ID/$IMAGE_REPO_NAME:$IMAGE_TAG
 
-# Generate requirements.txt for package
-echo "Generating requirements.txt for $package_name"
-( cd $project_path/src/$package_name && \
-  poetry export --without-hashes -f requirements.txt > requirements.txt );
-if head -1 src/$package_name/requirements.txt | grep -q Warning; then
-    >&2 head -1 src/$package_name/requirements.txt;
-    return 1
-fi
-
 # Stop and remove project container if it exists. Remove image if it exists
 echo "Removing container $container_name and image $image_name"
 docker ps       | grep -q $container_name && docker stop $container_name;

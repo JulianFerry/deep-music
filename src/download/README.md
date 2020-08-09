@@ -1,7 +1,12 @@
-## Local download
-- Run `download_local.zsh $DATASET` with `$DATASET` equal to `train`, `valid`, or `test` 
+# Option A: Local:
 
-## Cloud transfer:
-- Create  project on Google Cloud
-- Create a new storage bucket
-- Create a transfer job on the [Cloud Transfer Service](https://console.cloud.google.com/transfer/cloud/) console, with "List of object URLs" as the source and paste the following URL: https://raw.githubusercontent.com/JulianFerry/deep-music/dataflow/data/raw/urls.tsv
+## Local download
+- Run `download_local.zsh DATASETS` with `DATASETS` equal to any combination of `train`, `valid` and `test` 
+
+## Upload to cloud
+- Run `gsutil_copy.zsh DATASETS` with `DATASETS` equal to any combination of `train`, `valid` and `test` 
+
+# Option B: Cloud:
+
+## To run the above two steps in compute engine
+- Run `3. gcloud-run.zsh DATASETS` with `DATASETS` equal to any combination of `train`, `valid` and `test`. Specify `-r` to rebuild the docker image and `-p` to push the image before running.
