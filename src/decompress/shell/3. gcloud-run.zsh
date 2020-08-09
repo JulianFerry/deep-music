@@ -17,28 +17,22 @@ datasets=()
 while [[ $# -gt 0 ]]; do
     case $1 in
     -r|--rebuild)
-        # Rebuild image
+        # Rebuild image locally
         ( cd $project_path && . docker/$package_name/docker-build.zsh ) || return 1
         shift
         ;;
     -p|--push)
-        # Push image
+        # Push image to GCR
         ( docker push $image_name ) || return 1
         shift
         ;;
     -d|--deploy)
-        # Deploy image container on cloud run
-        ( gcloud run deploy \
-            --image $image_name \
-            --platform managed \
-            --region europe-west1 \
-            --memory 1G
-        ) || return 1
-        shift
-        ;;
-    train|valid|test)
-        # Add train/valid/test to datasets
-        datasets+=($1)
+        # Deploy image container to a compute engine VM
+        ( gcloud compute instances create-with-container $package_name \
+          --boot-disk-size 60G \
+          --container-stdin \
+          --container-tty \
+          --container-image $image_name ) || return 1
         shift
         ;;
     *)
@@ -47,35 +41,5 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# Authenticate current gcloud user to the service
-gcloud run services add-iam-policy-binding \
-  --platform managed \
-  --region europe-west1 \
-  $service_name \
-    --member user:$(gcloud config list account --format "value(core.account)") \
-    --role 'roles/run.invoker'
-
-# Get cloud-run app url for the service
-app_url=$(gcloud run services list --platform managed | \
-          grep -Po "(https://$service_name.*?)(?= )")
-
-# User settings
-BUCKET_NAME='deep-musik-data'
-ZIP_PATH_BASE='download.magenta.tensorflow.org/datasets/nsynth/nsynth-'
-SAVE_PATH='data/raw/'
-
-# Untar files specified in $datatset
-if [ -n $app_url ]; then
-    for dataset in "${datasets[@]}"; do
-        curl \
-          -X POST \
-          -H "Authorization: Bearer $(gcloud auth print-identity-token)" \
-          -H "Content-Type: application/json" \
-          --data "{
-              \"bucket_name\": \"${BUCKET_NAME}\",
-              \"zip_path\": \"${ZIP_PATH_BASE}${dataset}.jsonwav.tar.gz\",
-              \"save_path\": \"${SAVE_PATH}\"
-            }" \
-          $app_url
-    done
-fi
+gcloud compute ssh $package_name    # This may fail because the instance creation is not done yet
+# docker attach klt-decompress-xkin

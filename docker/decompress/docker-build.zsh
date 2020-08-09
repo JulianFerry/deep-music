@@ -32,4 +32,4 @@ echo "Building image $image_name"
   docker build \
     -t $image_name \
     -f $script_dir/Dockerfile \
-    $project_path/src/$package_name )
+    $project_path )
