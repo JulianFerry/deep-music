@@ -9,9 +9,14 @@ dataset=$1  # User must pass argument 'train', 'valid' or 'test' when running th
 data_url="http://download.magenta.tensorflow.org/datasets/nsynth/nsynth-$dataset.jsonwav.tar.gz"
 tar_file="nsynth-$dataset.tar.gz"
 
-( cd $project_path/data/raw &&
-    curl -f $data_url -o $tar_file &&                               # download tar
-    tar -xzf $tar_file &&                                           # untar
-    rm $tar_file                                                    # remove tar
-)
-
+case $dataset in
+    train|valid|test)
+      ( cd $project_path/data/raw &&
+        wget -O $tar_file $data_url &&                               # download tar
+        tar -xzf $tar_file &&                                        # untar
+        rm $tar_file                                                 # remove tar
+      )
+      ;;
+    *)
+      return 1
+esac

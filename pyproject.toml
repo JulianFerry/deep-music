@@ -9,7 +9,7 @@ authors = ["Julian Ferry <julianferry94@gmail.com>"]
 python = "^3.7"
 jupyter = { version = "^1.0.0",  optional = true }
 audiolib = { path = "../audiolib" }
-preprocessing = { path = "./src/preprocessing" }
+preprocess = { path = "./src/preprocess" }
 trainer = { path = "./src/trainer" }
 
 [tool.poetry.extras]
