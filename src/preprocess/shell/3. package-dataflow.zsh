@@ -5,8 +5,8 @@ package_name=$(basename $package_path);
 project_path=$(dirname $(dirname $package_path));
 export PYTHONPATH=$package_path
 
+BUCKET_NAME=deep-musik-data
 export GOOGLE_APPLICATION_CREDENTIALS=$project_path/credentials/gs-access-key.json
-bucket=gs://deep-musik-data
 
 # Parse JSON config
 config_list=$(cat $script_dir/configs.json)
@@ -52,9 +52,9 @@ echo "${config} \n"
 ( cd $package_path &&
   source .venv/bin/activate &&
   python3 ${package_name}_main.py \
-    --data_dir $bucket_name/data/raw/nsynth-$dataset \
-    --filters_dir $bucket_name/data/interim/filters/$dataset \
-    --job_dir $bucket_name/data/processed/spectrograms/config-$config_id/nsynth-$dataset \
+    --data_dir gs://$BUCKET_NAME/data/raw/nsynth-$dataset \
+    --filters_dir gs://$BUCKET_NAME/data/interim/filters/nsynth-$dataset \
+    --job_dir gs://$BUCKET_NAME/data/processed/spectrograms/config-$config_id/nsynth-$dataset \
     --config $config \
     --instruments '["keyboard_acoustic", "guitar_acoustic"]' \
     --runner dataflow \

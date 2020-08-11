@@ -1,13 +1,18 @@
+import os
+import pandas as pd
 from scipy.io import wavfile
 from audiolib import Audio
 
 import apache_beam as beam
 
 
-def load_audio(
-    f: beam.io.fileio.ReadableFile
-):
+def load_audio(f):
     """
+    Parameters
+    ----------
+    f: beam.io.fileio.ReadableFile
+        File object returned by beam.ReadMatches()
+
     """
     file_name = f.metadata.path.split('/')[-1]
     sampling_rate, data = wavfile.read(f.open())
@@ -38,11 +43,11 @@ class PreProcessor:
             'resolution': 5,
             'start': 0,
             'end': -1,
-            'config': []
+            'exclude': []
         }
         for k, v in default_params.items():
             self.fft_params[k] = self.fft_params.get(k, v)
-
+        
     def audio_to_spectrogram(self, record):
         """
         Convert an audio object to a spectrogram given a set of fft_params
@@ -58,3 +63,8 @@ class PreProcessor:
             ))
         return file_name, spec
 
+    def save_config(self, path):
+        try: os.makedirs(path, exist_ok=True)
+        except: pass
+        (pd.Series(self.fft_params)
+        .to_json(os.path.join(path, 'config.json')))

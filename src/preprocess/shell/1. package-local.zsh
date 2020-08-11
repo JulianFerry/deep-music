@@ -42,9 +42,9 @@ fi
 ( cd $package_path &&
   source .venv/bin/activate &&
   python3 ${package_name}_main.py \
-    --data_dir $project_path/data/raw/nsynth-train \
-    --filters_dir $project_path/data/interim/filters/train \
-    --job_dir $project_path/data/processed/spectrograms/config-$config_id \
+    --data_dir $project_path/data/raw/nsynth-test \
+    --filters_dir $project_path/data/interim/filters/nsynth-test \
+    --job_dir $project_path/data/processed/spectrograms/config-$config_id/nsynth-test \
     --config $config \
     --instruments '["keyboard_acoustic", "guitar_acoustic"]'
 )

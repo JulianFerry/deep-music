@@ -59,7 +59,9 @@ setuptools.setup(
     install_requires=[
         'apache-beam[gcp]==2.*,>=2.23.0',
         'numba==0.48.0',
-        'requests==2.*,>=2.24.0'
+        'requests==2.*,>=2.24.0',
+        'fsspec==0.8.0',
+        'gcsfs==0.6.2'
     ],
     cmdclass={
         # Command class instantiated and run during pip install scenarios.

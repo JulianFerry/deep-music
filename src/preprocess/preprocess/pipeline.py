@@ -7,6 +7,7 @@ from apache_beam.options.pipeline_options import PipelineOptions
 from apache_beam.options.pipeline_options import SetupOptions
 
 from .preprocess import load_audio, PreProcessor
+from .filters import filter_instrument_ids, FileFilter
 from .pickle import PickleSink, pickle_naming
 
 
@@ -14,20 +15,19 @@ def run_pipeline(args, pipeline_args, save_main_session=True):
     """
 
     """
-
-    # Handle args: config
-    pp = PreProcessor(fft_params=args['config'])
-    #pp.save_config(args['job_dir'])
-
-    # Handle args: instruments, filters_dir, exclude
-    instrument_ids = {'guitar_acoustic': ['guitar_acoustic_029-069']}
-    #instrument_ids = filter_instrument_ids(args['filters_dir'])
-    #exclude = args['exclude'] # make this a separate config argument
-    instrument_ids = [id for instr in args['instruments'] for id in instrument_ids.get(instr, [])]
+    # File input args: data_dir
     def id_to_path(id):
         return os.path.join(args['data_dir'], 'audio', id + '*.wav')
 
-    # Handle args: job_dir
+    # File filtering args: instruments, filters_dir, config['exclude']
+    instrument_ids = filter_instrument_ids(args.get('filters_dir'), args['instruments'])
+    ff = FileFilter(args['data_dir'], args['config'])
+
+    # Preprocessing args: config
+    pp = PreProcessor(fft_params=args['config'])
+    pp.save_config(args['job_dir'])
+
+    # Output args: job_dir
     def return_destination(*args):
         return args[-1]
     pickle_writer = WriteToFiles(
@@ -48,6 +48,7 @@ def run_pipeline(args, pipeline_args, save_main_session=True):
             | 'LoadInstrumentIds' >> beam.Create(instrument_ids)
             | 'CreateFilePaths' >> beam.Map(id_to_path)
             | 'MatchFiles' >> MatchAll()
+            | 'FilterFiles' >> beam.Filter(ff.filter_audio_qualities)
             | 'OpenFiles' >> ReadMatches()
             | 'LoadAudio' >> beam.Map(load_audio)
             | 'AudioToSpectrogram' >> beam.Map(pp.audio_to_spectrogram)
