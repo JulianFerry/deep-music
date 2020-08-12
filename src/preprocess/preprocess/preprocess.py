@@ -64,7 +64,7 @@ class PreProcessor:
         return file_name, spec
 
     def save_config(self, path):
-        try: os.makedirs(path, exist_ok=True)
-        except: pass
+        if not path.startswith('gs://'):
+            os.makedirs(path, exist_ok=True)
         (pd.Series(self.fft_params)
         .to_json(os.path.join(path, 'config.json')))

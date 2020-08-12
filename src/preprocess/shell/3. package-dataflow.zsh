@@ -58,6 +58,7 @@ echo "${config} \n"
     --config $config \
     --instruments '["keyboard_acoustic", "guitar_acoustic"]' \
     --runner dataflow \
+    --num_workers 4 \
     --noauth_local_webserver \
     --setup_file $package_path/setup.py \
     --extra_package $project_path/../audiolib/dist/audiolib-0.1.0.tar.gz
