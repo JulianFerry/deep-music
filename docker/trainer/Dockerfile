@@ -15,7 +15,7 @@ COPY src/trainer /opt/trainer
 WORKDIR /opt/trainer
 RUN pip install -U pip && \
     pip install --quiet -Iv future==0.18.2 && \
-    pip install -r requirements.txt --trusted-host 35.240.45.166 --no-deps --ignore-installed
+    pip install -r requirements.txt --no-deps --ignore-installed
 
 # Add opt to python path and create directory to download data 
 ENV PYTHONPATH "${PYTHONPATH}:/opt/"

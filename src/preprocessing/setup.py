@@ -61,7 +61,8 @@ setuptools.setup(
         'numba==0.48.0',
         'requests==2.*,>=2.24.0',
         'fsspec==0.8.0',
-        'gcsfs==0.6.2'
+        'gcsfs==0.6.2',
+        'audiolib @ git+ssh://git@github.com/JulianFerry/audiolib@0.1.0#egg=audiolib-0.1.0'
     ],
     cmdclass={
         # Command class instantiated and run during pip install scenarios.

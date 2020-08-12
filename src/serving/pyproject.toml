@@ -5,14 +5,9 @@ description = "Flask model-serving API"
 authors = ["JulianFerry <julianferry94@gmail.com>"]
 
 
-[[tool.poetry.source]]
-name = "pypiserver"
-url = "http://35.240.45.166/"
-
-
 [tool.poetry.dependencies]
 python = "^3.7"
-audiolib = "^0.1.0"
+audiolib = { git = "https://github.com/JulianFerry/audiolib", tag="0.1.0" }
 preprocessing = { path = "../preprocessing" }
 trainer = { path = "../trainer" }
 flask = "^1.1.2"
