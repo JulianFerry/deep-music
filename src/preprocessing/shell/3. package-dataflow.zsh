@@ -32,18 +32,19 @@ do
     esac
 done
 
+# Read numeric config between 0 and last_id if not specified
 while ! ([[ $config_id =~ ^[0-9]+$ ]] && [ $config_id -le $last_id ] && [ $config_id -ge 0 ]); do
     echo -n "Enter preprocessing config ID (0 to $last_id): "
     read config_id;
 done
 
+# Read dataset (train/valid/test) if not specified
 while ! [[ "$dataset" =~ ^(train|valid|test)$ ]]; do
     echo -n "Enter dataset name (train/valid/test): "
     read dataset;
 done
 echo
 
-# If argument is numeric and the config ID exists
 echo "Using preprocessing config id $config_id for nsynth-$dataset:"
 config=$(echo $config_list | jq ".[$config_id].config?")
 echo "${config} \n"

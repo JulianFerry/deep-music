@@ -1,5 +1,5 @@
 import logging
-from preprocess import task
+from preprocessing import task
 
 if __name__ == '__main__':
   logging.getLogger().setLevel(logging.INFO)

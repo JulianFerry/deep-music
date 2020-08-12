@@ -49,13 +49,13 @@ class CustomCommands(setuptools.Command):
 
 setuptools.setup(
     long_description='',
-    name='preprocess',
+    name='preprocessing',
     version='0.1.0',
     description='Audio preprocessing for deep-music project',
     python_requires='==3.*,>=3.7.0',
     author='JulianFerry',
     author_email='julianferry94@gmail.com',
-    packages=['preprocess'],
+    packages=['preprocessing'],
     install_requires=[
         'apache-beam[gcp]==2.*,>=2.23.0',
         'numba==0.48.0',
