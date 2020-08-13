@@ -44,7 +44,7 @@ done
     --boot-disk-size 60G \
     --scopes "compute-rw,logging-write,storage-rw" \
     --metadata "image_name=$image_name,container_args=$datasets" \
-    --metadata-from-file "startup-script=$script_dir/startup-script.sh" )
+    --metadata-from-file "startup-script=$package_path/startup-script.sh" )
 
 
 gcloud compute ssh $package_name    # This may fail because the instance creation is not done yet
