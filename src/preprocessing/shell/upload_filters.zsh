@@ -8,4 +8,4 @@ export PYTHONPATH=$package_path
 BUCKET_NAME="deep-musik-data"
 
 export GOOGLE_APPLICATION_CREDENTIALS=$project_path/credentials/gs-access-key.json
-gsutil -m cp -r $project_path/data/interim/filters gs://$BUCKET_NAME/data/interim/filters
+gsutil -m cp -r $project_path/data/interim/filters gs://$BUCKET_NAME/data/interim/

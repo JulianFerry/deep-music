@@ -17,7 +17,8 @@ class PickleSink(FileSink):
         self._fh = fh
 
     def write(self, record):
-        self._fh.write(pickle.dumps(record))
+        file_name, data = record
+        self._fh.write(pickle.dumps(data))
 
     def flush(self):
         self._fh.flush()
