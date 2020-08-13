@@ -84,7 +84,7 @@ class SummaryWriterCallback(tbx.SummaryWriter, Callback):
     ----------
     path: str
         The path used to save the logs
-    data_config: dict
+    train_config: dict
         The data configuration used for the training job
     update_freq: str
         How often to write logs. Format "N epoch(s)" or "N batche(s)"
@@ -92,12 +92,12 @@ class SummaryWriterCallback(tbx.SummaryWriter, Callback):
         Hyperparameters used for the training job
 
     """
-    def __init__(self, path, data_config, update_freq='epoch', hparams=None):
+    def __init__(self, path, train_config, update_freq='epoch', hparams=None):
         # Parse params
         self.path = path
         self.log_stage = self._parse_stage(update_freq)
         self.log_freq = self._parse_freq(update_freq)
-        self.data_config = data_config
+        self.train_config = train_config
         self.hparams = hparams
         # Initialise summary writer
         if path.startswith('gs://'):
@@ -109,11 +109,11 @@ class SummaryWriterCallback(tbx.SummaryWriter, Callback):
         # Save data config
         local_path = self.path.replace('gs://', '')
         os.makedirs(local_path, exist_ok=True)
-        config_path = os.path.join(local_path, 'data_config.json')
+        config_path = os.path.join(local_path, 'train_config.json')
         with open(config_path, 'w') as f:
-            json.dump(self.data_config, f)
+            json.dump(self.train_config, f)
         if self.path.startswith('gs://'):
-            gsutil.upload(config_path, os.path.join(self.path, 'data_config.json'))
+            gsutil.upload(config_path, os.path.join(self.path, 'train_config.json'))
         # Save hparams
     #     if self.hparams is not None:
     #         self.add_hparams(hparam_dict=self.hparams,

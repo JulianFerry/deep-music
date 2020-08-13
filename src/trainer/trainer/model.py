@@ -104,7 +104,7 @@ class MusicNet(nn.Module):
 
     def validate(self, test_loader):
         """
-        Calculate loss and accuracy on the validation data
+        Calculate loss and accuracy on the test_loader data
 
         """
         loss = 0

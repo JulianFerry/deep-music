@@ -1,7 +1,7 @@
 import argparse
 import json
 from pathlib import Path
-from . import trainer
+from . import train
 
 
 def json_loads(s):
@@ -35,8 +35,8 @@ def get_args():
         default=1
     )
     parser.add_argument(
-        '--data_config',
-        help='Data config: preprocessing config + subset of instruments to classify',
+        '--train_config',
+        help='Train config: preprocessing config + subset of instruments to classify',
         type=json_loads,
         default='{}'
     )

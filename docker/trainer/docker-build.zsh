@@ -14,7 +14,7 @@ image_name=eu.gcr.io/$PROJECT_ID/$IMAGE_REPO_NAME:$IMAGE_TAG
 # Generate requirements.txt for package
 echo "Generating requirements.txt for $package_name"
 ( cd $project_path/src/$package_name && \
-  poetry export --without-hashes -f requirements.txt > requirements.txt );
+  poetry export --without-hashes -f requirements.txt | sed 's/-e //' > requirements.txt );
 if head -1 src/$package_name/requirements.txt | grep -q Warning; then
     >&2 head -1 src/$package_name/requirements.txt;
     return 1
@@ -34,5 +34,4 @@ echo "Building image $image_name"
   docker build \
     -t $image_name \
     -f $script_dir/Dockerfile \
-    --network pypinet \
     $project_path )

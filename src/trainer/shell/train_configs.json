@@ -2,14 +2,14 @@
     {
         "id": 0,
         "config": {
-            "data_id": 0,
-            "instruments": ["keyboard_acoustic", "guitar_acoustic"]
+            "data_config_id": 0,
+            "instruments": ["brass_electronic", "string_electronic"]
         }
     },
     {
         "id": 1,
         "config": {
-            "data_id": 1,
+            "data_config_id": 0,
             "instruments": ["keyboard_acoustic", "guitar_acoustic"]
         }
     }

@@ -9,14 +9,8 @@ from torch.utils.data import Dataset, DataLoader
 from torch.utils.data.sampler import SubsetRandomSampler
 from torchvision import transforms
 
+from google.cloud import storage
 from . import gsutil
-
-
-def listdir(path):
-    files = os.listdir(path)
-    if '.DS_Store' in files:
-        files.remove('.DS_Store')
-    return files
 
 
 class SpectrogramDataset(Dataset):
@@ -38,10 +32,9 @@ class SpectrogramDataset(Dataset):
 
     def __init__(self, root, instruments, spec_transform=None, label_transform=None):
         root = Path(root)
-        nested_files = [[root/instr/instr_id/instr_file
-                         for instr_id in listdir(root/instr)
-                         for instr_file in listdir(root/instr/instr_id)]
-                        for instr in instruments]
+        all_files = os.listdir(root)
+        nested_files = [[root/f for f in all_files if f.startswith(instr)]
+                                for instr in instruments] # noqa
         self.files = [f for instr_files in nested_files
                         for f in instr_files]  # noqa
         self.class_counts = [len(instr_files) for instr_files in nested_files]
