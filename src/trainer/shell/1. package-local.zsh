@@ -11,26 +11,25 @@ export PYTHONPATH=$package_path
 # No arguments to parse
 
 # Mock config parsing
-echo "Using training data config:"
-data_config='{
-  "data_id": 0,
+echo "Using training config:"
+train_config='{
+  "data_config_id": 0,
   "instruments": ["brass_electronic", "string_electronic"]
 }'
-echo $data_config
-data_id=$(echo $data_config | jq ".data_id?")
-echo "Applied to data preprocessed with data_config $data_id"
+echo $train_config
+data_config_id=$(echo $train_config | jq ".data_config_id?")
 echo
 
 
-# Data paths
-data_path=data/processed/spectrograms/config-$data_id/nsynth-train
-output_path=output/${package_name}_local
+# User defined data paths
+DATA_PATH="data/processed/spectrograms/config-$data_config_id/nsynth-train"
+OUTPUT_PATH="trainer-output/local"
 
 # Test that the package works
 ( cd $package_path &&
   poetry run python3 -m $package_name.task \
-    --data_dir $project_path/$data_path \
-    --job_dir $project_path/$output_path \
-    --data_config $data_config \
+    --data_dir $project_path/$DATA_PATH \
+    --job_dir $project_path/$OUTPUT_PATH \
+    --train_config $train_config \
     --epochs 2
 )

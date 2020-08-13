@@ -6,33 +6,24 @@ project_path=$(dirname $(dirname $package_path));
 project_name=$(basename $project_path);
 service_name=$project_name-$package_name;
 
-# GCP AI platform container naming
-PROJECT_ID=$(gcloud config list project --format "value(core.project)")
-IMAGE_REPO_NAME=$service_name
-IMAGE_TAG=latest
-REGION=europe-west1
-BUCKET_NAME=deep-musik-data
-IMAGE_URI=eu.gcr.io/$PROJECT_ID/$IMAGE_REPO_NAME:$IMAGE_TAG
+# GCP container registry naming
+project_id=$(gcloud config list project --format "value(core.project)")
+image_tag=latest
+image_uri=eu.gcr.io/$project_id/$service_name:$image_tag
 
 
 # Parse JSON config file
-config_list=$(cat $script_dir/configs.json)
+config_list=$(cat $script_dir/train_configs.json)
 last_id=$(echo $config_list | jq ".[-1].id?")
-config_id=$last_id
-echo
+config_id=-1
 
 # Parse arguments
 while [[ $# -gt 0 ]]
 do
     case $1 in
     -i|--id)
-        # Store config ID - if argument is numeric and the config ID exists
-        if [[ $2 =~ ^[0-9]+$ ]] && [ $2 -le $last_id ] && [ $2 -ge 0 ]; then
-            config_id=$2
-            shift 2
-        else
-            echo "Error: No config found with id $2." && return 1
-        fi
+        config_id=$2
+        shift 2
         ;;
     -r|--rebuild)
         # Rebuild image
@@ -41,7 +32,7 @@ do
         ;;
     -p|--push)
         # Push image
-        docker push $IMAGE_URI
+        docker push $image_uri
         shift
         ;;
     *)
@@ -50,27 +41,34 @@ do
     esac
 done
 
+# Read numeric config between 0 and last_id if not specified
+while ! ([[ $config_id =~ ^[0-9]+$ ]] && [ $config_id -le $last_id ] && [ $config_id -ge 0 ]); do
+    echo -n "Enter training config ID (0 to $last_id): "
+    read config_id;
+done
+
 # Parse config
-echo "Using training data config id $config_id:"
-data_config=$(echo $config_list | jq ".[$config_id].config?")
-echo $data_config
-data_id=$(echo $config_list | jq ".[$config_id].config.data_id?")
-echo "Applied to data preprocessed with config $data_id"
+echo "Using training config id $config_id:"
+train_config=$(echo $config_list | jq ".[$config_id].config?")
+echo $train_config
+data_config_id=$(echo $config_list | jq ".[$config_id].config.data_config_id?")
 echo
 
 
 # Data paths
-data_path=data/processed/spectrograms/config-$data_id/nsynth-train
-JOB_DIR=${package_name}/config${config_id}/$(date +%y%m%d_%H%M%S);
-output_path=output/${JOB_DIR}
-JOB_NAME=${JOB_DIR//\//_};  # replace / with _ for job name
+BUCKET_NAME="deep-musik-data"
+REGION='europe-west1'
+DATA_PATH="data/processed/spectrograms/config-$data_config_id/nsynth-train"
+JOB_DIR="config${config_id}/$(date +%y%m%d_%H%M%S)"
+job_name=${JOB_DIR//\//_};  # replace / with _ for job name
+OUTPUT_PATH="trainer-output/${JOB_DIR}"
 
 # Submit training job to gcloud AI platform
-gcloud ai-platform jobs submit training $JOB_NAME \
+gcloud ai-platform jobs submit training $job_name \
   --region $REGION \
-  --master-image-uri $IMAGE_URI \
+  --master-image-uri $image_uri \
   -- \
-    --data_dir=gs://$BUCKET_NAME/$data_path \
-    --job_dir=gs://$BUCKET_NAME/$output_path \
-    --data_config $data_config \
+    --data_dir=gs://$BUCKET_NAME/$DATA_PATH \
+    --job_dir=gs://$BUCKET_NAME/$OUTPUT_PATH \
+    --train_config $train_config \
     --epochs=100

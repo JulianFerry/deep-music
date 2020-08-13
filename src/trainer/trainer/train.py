@@ -25,12 +25,12 @@ def train_and_evaluate(args):
     hparams = {'lr': args['lr']}
     tb_writer = SummaryWriterCallback(
         path=args['job_dir'],
-        data_config=args['data_config'],
+        train_config=args['train_config'],
         hparams=hparams
     )
     callbacks = [tb_writer]
     # Data
-    instruments =  args['data_config']['instruments']
+    instruments = args['train_config']['instruments']
     train_loader, test_loader = load_data(
         args['data_dir'],
         instruments,

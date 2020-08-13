@@ -9,14 +9,17 @@ data/**
 !data/**/.gitkeep
 !data/raw/urls.tsv
 
-# Preprocessing and training outputs
-output/
+# Training outputs
+trainer-output/
 
 # GCP credentials
 credentials/
 
 # Other
 .vscode
+
+# Audiolib sdist
+**/audiolib**
 
 
 # Python defaults
