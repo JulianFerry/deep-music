@@ -3,7 +3,8 @@ abspath() {
   echo "$(cd "$(dirname "$1")" && pwd)/$(basename "$1")"
 }
 script_dir=$(dirname $0:A);
-project_path=$(abspath $(dirname $(dirname $script_dir)));
+package_path=$(dirname $script_dir);
+project_path=$(abspath $(dirname $(dirname $package_path)));
 
 dataset=$1  # User must pass argument 'train', 'valid' or 'test' when running this script
 bucket_name="deep-musik-data"
