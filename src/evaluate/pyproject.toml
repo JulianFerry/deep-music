@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "evaluate"
+version = "0.1.0"
+description = ""
+authors = ["Julian Ferry <julianferry94@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+jupyter = "^1.0.0"
+audiolib = { git = "https://github.com/JulianFerry/audiolib", tag="0.1.0" }
+preprocessing = { path = "../preprocessing" }
+trainer = { path = "../trainer" }
+
+[tool.poetry.dev-dependencies]
+flake8 = "^3.7.9"
+pytest = "^5.3.5"
+pytest-cov = "^2.8.1"
+
+[build-system]
+requires = ["poetry>=1.0.5"]
+build-backend = "poetry.masonry.api"
