@@ -1,8 +1,8 @@
 import argparse
 import json
-from pathlib import Path
-from warnings import warn
-from .batch import filter_instrument_ids, save_spectrograms
+
+from .pipeline import run_pipeline
+
 
 def get_args():
     """
@@ -48,25 +48,23 @@ def get_args():
     )
 
     # Parse
-    args = parser.parse_args()
-    args = args.__dict__
+    known_args, pipeline_args = parser.parse_known_args()
+    known_args = known_args.__dict__
+    try:
+        runner_idx = pipeline_args.index('--runner')
+        if pipeline_args[runner_idx+1] == 'dataflow':
+            pipeline_args.extend([
+                '--project=deep-musik',
+                '--region=europe-west1',
+                '--staging_location=gs://deep-musik-data/staging',
+                '--temp_location=gs://deep-musik-data/tmp',
+                '--job_name=preprocess',
+            ])
+    except:
+        pass
+    return known_args, pipeline_args
 
-    return args
 
-
-if __name__ == '__main__':
-    # Parse command-line arguments
+def run():
     args = get_args()
-
-    instrument_ids = filter_instrument_ids(args['filters_dir'])
-    for instr in args['instruments']:
-        if instrument_ids.get(instr):
-            save_spectrograms(
-                args['data_dir'],
-                instr,
-                instrument_ids[instr],
-                args['config'],
-                args['job_dir']
-            )
-        else:
-            warn(f'{instr} not in instrument filters, skipping...')
+    run_pipeline(*args)

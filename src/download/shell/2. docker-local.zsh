@@ -12,25 +12,29 @@ IMAGE_REPO_NAME=$service_name
 IMAGE_TAG=latest
 image_name=eu.gcr.io/$PROJECT_ID/$IMAGE_REPO_NAME:$IMAGE_TAG
 
-
-# No JSON config file to parse
-
+datasets=()
 # Parse arguments
-for arg in $@
-do
-    case $arg in
+while [[ $# -gt 0 ]]; do
+    case $1 in
     -r|--rebuild)
-        # Rebuild image
+        # Rebuild image locally
         ( cd $project_path && . docker/$package_name/docker-build.zsh ) || return 1
+        shift
+        ;;
+    train|valid|test)
+        # Add train/valid/test to datasets
+        datasets+=($1)
+        shift
+        ;;
+    *)
+        shift
         ;;
     esac
 done
 
-
-# Test that the image works, using mounted credentials
-docker run --rm \
-  --volume $project_path/credentials/:/opt/credentials/:ro \
-  --env GOOGLE_APPLICATION_CREDENTIALS='/opt/credentials/gs-access-key.json' \
+# Deploy image container to a compute engine VM
+( docker run --rm \
   --name $service_name \
-  --publish 8080:8080 \
-  $image_name
+  $image_name $datasets )
+
+gcloud compute ssh $package_name    # This may fail because the instance creation is not done yet
