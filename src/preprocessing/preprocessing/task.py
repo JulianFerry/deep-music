@@ -1,10 +1,11 @@
+import sys
 import argparse
 import json
 
 from .pipeline import run_pipeline
 
 
-def get_args():
+def parse_args(args):
     """
     Argument parser.
     See preprocessing.preprocess_dataset modoule for more info.
@@ -48,7 +49,7 @@ def get_args():
     )
 
     # Parse
-    known_args, pipeline_args = parser.parse_known_args()
+    known_args, pipeline_args = parser.parse_known_args(args)
     known_args = known_args.__dict__
     try:
         runner_idx = pipeline_args.index('--runner')
@@ -66,5 +67,5 @@ def get_args():
 
 
 def run():
-    args = get_args()
+    args = parse_args(sys.argv[1:])
     run_pipeline(*args)
