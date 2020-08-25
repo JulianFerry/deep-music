@@ -1,4 +1,3 @@
-import os
 from torch import nn, optim
 
 from .model import MusicNet
@@ -18,11 +17,14 @@ def train_and_evaluate(args):
     """
     # Model definitino
     model = MusicNet()
-    criterion = nn.NLLLoss()
+    loss_fn = nn.NLLLoss()
     optimizer = optim.SGD(model.parameters(), lr=args['lr'], momentum=0.9)
-    model.compile(criterion, optimizer)
+    model.compile(loss_fn, optimizer)
     # Callbacks
-    hparams = {'lr': args['lr']}
+    hparams = {
+        'lr': args['lr'],
+        'data_config': args['train_config']['data_config_id']
+    }
     tb_writer = SummaryWriterCallback(
         path=args['job_dir'],
         train_config=args['train_config'],
@@ -41,6 +43,7 @@ def train_and_evaluate(args):
         train_loader,
         test_loader,
         epochs=args['epochs'],
-        callbacks=callbacks)
+        callbacks=callbacks
+    )
     # Save
     model.save(args['job_dir'])

@@ -1,7 +1,6 @@
 import argparse
 import json
-from pathlib import Path
-from . import train
+from .train import train_and_evaluate
 
 
 def json_loads(s):
@@ -25,7 +24,7 @@ def get_args():
     parser.add_argument(
         '--lr',
         help='Optimiser learning rate',
-        type=int,
+        type=float,
         default=0.001
     )
     parser.add_argument(
@@ -38,17 +37,19 @@ def get_args():
         '--train_config',
         help='Train config: preprocessing config + subset of instruments to classify',
         type=json_loads,
-        default='{}'
+        required=True
     )
 
     # Paths
     parser.add_argument(
         '--job_dir',
         help='GCS location to write logs and checkpoint model weights',
+        required=True
     )
     parser.add_argument(
         '--data_dir',
         help='GCS location to fetch data from',
+        required=True
     )
 
     # Parse
@@ -60,4 +61,4 @@ def get_args():
 
 if __name__ == '__main__':
     args = get_args()
-    trainer.train_and_evaluate(args)
+    train_and_evaluate(args)
