@@ -1,0 +1,18 @@
+trainingInput:
+  scaleTier: BASIC_GPU
+  hyperparameters:
+    algorithm: GRID_SEARCH
+    goal: MAXIMIZE
+    maxTrials: 2
+    maxParallelTrials: 1
+    hyperparameterMetricTag: epoch_acc/val
+    params:
+    - parameterName: epochs
+      type: DISCRETE
+      discreteValues:
+      - 100
+    - parameterName: lr
+      type: DISCRETE
+      discreteValues:
+      - 0.001
+      - 0.01

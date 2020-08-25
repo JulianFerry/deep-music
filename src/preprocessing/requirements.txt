@@ -5,3 +5,7 @@ git+ssh://git@github.com/JulianFerry/audiolib@0.1.0#egg=audiolib-0.1.0
 fsspec==0.8.0
 gcsfs==0.6.2
 -e .
+
+# dev
+jupyter==1.0.0
+pytest==6.0.1

@@ -10,6 +10,7 @@ jupyter = "^1.0.0"
 audiolib = { git = "https://github.com/JulianFerry/audiolib", tag="0.1.0" }
 preprocessing = { path = "../preprocessing" }
 trainer = { path = "../trainer" }
+tensorboard = "^2.3.0"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^3.7.9"

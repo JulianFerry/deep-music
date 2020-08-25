@@ -1,7 +1,8 @@
 #!/bin/zsh
 script_dir=$(dirname $0:A);
-package_name=$(basename $script_dir)
-project_path=$(dirname $(dirname $script_dir));
+package_path=$(dirname $script_dir);
+package_name=$(basename $package_path);
+project_path=$(dirname $(dirname $package_path));
 project_name=$(basename $project_path);
 container_name=$project_name-$package_name;
 
@@ -19,8 +20,8 @@ docker image ls | grep -q $image_name && docker rmi -f $image_name;
 
 # Build project image - needs the whole project as build context
 echo "Building image $image_name"
-( cd $project_path && \
+( cd $package_path && \
   docker build \
     -t $image_name \
     -f $script_dir/Dockerfile \
-    $project_path )
+    $package_path )

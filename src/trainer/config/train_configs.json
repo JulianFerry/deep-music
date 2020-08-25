@@ -9,6 +9,13 @@
     {
         "id": 1,
         "config": {
+            "data_config_id": 1,
+            "instruments": ["brass_electronic", "string_electronic"]
+        }
+    },
+    {
+        "id": 2,
+        "config": {
             "data_config_id": 0,
             "instruments": ["keyboard_acoustic", "guitar_acoustic"]
         }

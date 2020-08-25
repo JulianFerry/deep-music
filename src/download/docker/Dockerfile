@@ -4,9 +4,9 @@ RUN apt-get update && apt-get install wget -y
 WORKDIR /home/
 
 # Copy code
-COPY src/download/download src/download/download
+COPY download /home/download
 RUN mkdir data && mkdir data/raw
 
-COPY docker/download/entrypoint.sh entrypoint.sh
+COPY docker/entrypoint.sh entrypoint.sh
 
 ENTRYPOINT ["sh", "entrypoint.sh"]

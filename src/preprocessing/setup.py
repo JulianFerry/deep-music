@@ -40,7 +40,7 @@ class CustomCommands(setuptools.Command):
         print('Command output: %s' % stdout_data)
         if p.returncode != 0:
             raise RuntimeError(
-                    'Command %s failed: exit code: %s' % (command_list, p.returncode))
+                'Command %s failed: exit code: %s' % (command_list, p.returncode))
 
     def run(self):
         for command in CUSTOM_COMMANDS:
