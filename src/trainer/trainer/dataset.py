@@ -9,18 +9,17 @@ from torch.utils.data import Dataset, DataLoader
 from torch.utils.data.sampler import SubsetRandomSampler
 from torchvision import transforms
 
-from google.cloud import storage
 from . import gsutil
 
 
 class SpectrogramDataset(Dataset):
     """
     CQT spectrograms dataset
-    
+
     Parameters
     ----------
     root: string
-        Directory which contains all the pickled spectrograms 
+        Directory which contains all the pickled spectrograms
     instruments: list
         List of instrument files to keep for training
     spec_transform: PyTorch transform object
@@ -30,13 +29,21 @@ class SpectrogramDataset(Dataset):
 
     """
 
-    def __init__(self, root, instruments, spec_transform=None, label_transform=None):
+    def __init__(
+        self,
+        root: str,
+        instruments: list,
+        spec_transform=None,
+        label_transform=None
+    ):
         root = Path(root)
         all_files = os.listdir(root)
         nested_files = [[root/f for f in all_files if f.startswith(instr)]
-                                for instr in instruments] # noqa
+                                for instr in instruments]  # noqa
         self.files = [f for instr_files in nested_files
                         for f in instr_files]  # noqa
+        if not self.files:
+            raise RuntimeError('No %s data found in: %s' % (instruments, root))
         self.class_counts = [len(instr_files) for instr_files in nested_files]
         self.instruments = instruments
         self.spec_transform = spec_transform
@@ -58,7 +65,8 @@ class SpectrogramDataset(Dataset):
         -------
         sample: (spectrogram, label)
 
-            * spectrogram: audiolib.Spectrogram (unless `spec_transform` modifies type)
+            * spectrogram: audiolib.Spectrogram
+              (unless `spec_transform` modifies type)
             * label: int (unless `label_transform` modifies type)
 
         """
@@ -107,6 +115,15 @@ def stratified_split(dataset, split=0.8, seed=42):
     """
     Train/test split, stratified for each label
 
+    Parameters
+    ----------
+    dataset: torch.utils.data.Dataset
+        Dataset to perform a stratified split for
+    split: float
+        Train/test split ratio
+    seed: int
+        Numpy random seed to use for shuffling
+
     """
     train_indices = []
     test_indices = []
@@ -141,7 +158,8 @@ def norm_params(data_dir, instruments, save_path=None):
         with open(norm_path, 'w') as f:
             json.dump({'mean': mean, 'std': std}, f)
         if save_path.startswith('gs://'):
-            gsutil.upload(norm_path, os.path.join(save_path, 'norm_params.json'))
+            gs_norm_path = os.path.join(save_path, 'norm_params.json')
+            gsutil.upload(norm_path, gs_norm_path)
     return mean, std
 
 
@@ -177,6 +195,14 @@ def load_data(data_dir, instruments, save_path):
         data_dir, instruments, spec_transform, label_transform)
     # PyTorch data loaders (train/test split)
     train_sampler, test_sampler = stratified_split(spec_dataset)
-    train_loader = DataLoader(spec_dataset, batch_size=32, sampler=train_sampler)
-    test_loader = DataLoader(spec_dataset, batch_size=32, sampler=test_sampler)
+    train_loader = DataLoader(
+        spec_dataset,
+        batch_size=32,
+        sampler=train_sampler
+    )
+    test_loader = DataLoader(
+        spec_dataset,
+        batch_size=32,
+        sampler=test_sampler
+    )
     return train_loader, test_loader
