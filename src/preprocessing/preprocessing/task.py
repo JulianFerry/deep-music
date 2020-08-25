@@ -51,18 +51,17 @@ def parse_args(args):
     # Parse
     known_args, pipeline_args = parser.parse_known_args(args)
     known_args = known_args.__dict__
-    try:
+    if '--runner' in pipeline_args:
         runner_idx = pipeline_args.index('--runner')
-        if pipeline_args[runner_idx+1] == 'dataflow':
-            pipeline_args.extend([
-                '--project=deep-musik',
-                '--region=europe-west1',
-                '--staging_location=gs://deep-musik-data/staging',
-                '--temp_location=gs://deep-musik-data/tmp',
-                '--job_name=preprocess',
-            ])
-    except:
-        pass
+        if len(pipeline_args) > runner_idx + 1:
+            if pipeline_args[runner_idx+1] == 'dataflow':
+                pipeline_args.extend([
+                    '--project=deep-musik',
+                    '--region=europe-west1',
+                    '--staging_location=gs://deep-musik-data/staging',
+                    '--temp_location=gs://deep-musik-data/tmp',
+                    '--job_name=preprocess',
+                ])
     return known_args, pipeline_args
 
 

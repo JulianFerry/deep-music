@@ -1,4 +1,3 @@
-import os
 import re
 import pickle
 
@@ -21,10 +20,7 @@ def pickle_naming(record: tuple):
 
     """
     wav_name, spectrogram = record
-    instr_id = wav_name.split('-')[0]
-    instr_name = re.findall('(^.*)_', wav_name)[0]
     file_name = re.findall('(^.*).wav', wav_name)[0] + '.spec'
-    file_path = os.path.join(instr_name, instr_id, file_name)
     return file_name
 
 

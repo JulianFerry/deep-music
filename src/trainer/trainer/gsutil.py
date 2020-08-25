@@ -10,10 +10,10 @@ def gcloud_auth():
     """
     key_file = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', '')
     if os.path.exists(key_file):
-        subprocess.run(
-            ['gcloud', 'auth', 'activate-service-account', '--key-file', key_file])
+        subprocess.run(['gcloud', 'auth', 'activate-service-account',
+                        '--key-file', key_file])
     global AUTHENTICATED
-    AUTHENTICATED=True
+    AUTHENTICATED = True
 
 
 def upload(local_path, gs_path):
