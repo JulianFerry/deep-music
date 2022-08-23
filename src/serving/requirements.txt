@@ -36,7 +36,7 @@ llvmlite==0.31.0
 markupsafe==1.1.1
 matplotlib==3.2.2
 numba==0.48.0
-numpy==1.19.0
+numpy==1.22.0
 pandas==1.0.5
 parso==0.7.0
 pexpect==4.8.0; sys_platform != "win32"
