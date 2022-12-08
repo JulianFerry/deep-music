@@ -3,7 +3,7 @@ git+https://github.com/JulianFerry/audiolib@ab18f52140a307b585086b0c3357a57a663d
 audioread==2.1.8
 backcall==0.2.0
 cachetools==4.1.1
-certifi==2020.6.20
+certifi==2022.12.7
 cffi==1.14.2
 chardet==3.0.4
 cloudml-hypertune==0.1.0.dev6
